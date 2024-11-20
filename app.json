@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "scheme": "acme",
+    "newArchEnabled": true,
+    "userInterfaceStyle": "automatic",
+    "orientation": "default",
+    "web": {
+      "output": "static",
+      "bundler": "metro"
+    },
+    "android": {
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "experiments": {
+      "typedRoutes": true
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": "https://n"
+        }
+      ]
+    ],
+    "name": "Sail",
+    "slug": "Sail"
+  }
+  
+  
+}
