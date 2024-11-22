@@ -32,10 +32,12 @@ const Compas: React.FC = () => {
   }, []);
 
   return (
-    <View className="flex-1 justify-center items-center">
-      <Text className="text-xl mb-4">
-        Cap suivi : {heading !== null ? `${heading.toFixed(0)}°` : 'Calcul en cours...'}
+    <View className="w-1/2 mb-4 justify-center items-center bg-slate-600 rounded-lg">
+      <Text className="text-xl text-blue-400 ">
+        Cap compas : 
       </Text>
+      <Text className="text-5xl text-slate-400">
+        {heading !== null ? `${heading.toFixed(0)}°` : 'Calcul en cours...'}</Text>
     </View>
   );
 };

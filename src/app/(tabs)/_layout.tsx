@@ -51,7 +51,7 @@ tabBarIcon: ({color,focused}) => (
 
 <Tabs.Screen name="navigation" options = {{
 title: "Navigation",
-// headerShown: false,
+headerShown: false,
 tabBarIcon: ({color,focused}) => (
   <TabIcon
   icon = {icons.navigation}
