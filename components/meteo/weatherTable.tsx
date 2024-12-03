@@ -5,12 +5,13 @@ import { DataTable } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Float } from "react-native/Libraries/Types/CodegenTypes";
 import { format, parseISO } from "date-fns";
+import ClickButton from "components/usefull/clickButton";
 
 
 const WeatherTable = ({ weatherData }) => {
   const [unit, setUnit] = useState("Noeuds");
 // Gestion du changement d'unité
-const changeUnit = (selectedUnit) => {
+const changeUnit = (selectedUnit: string) => {
   setUnit(selectedUnit);
 };
   const windData = weatherData.hourly;
@@ -48,21 +49,17 @@ const rainColor = (rain) => {
 
   return (
     <View className="bg-slate-400 dark:bg-slate-900" >
-      <SelectList
-          
-          options={["Noeuds", "Km/h"]}
-          onSelect={changeUnit}
-          label="Unité de vitesse"
-          defaultValue="Noeuds"
+     <ClickButton values={["Noeuds","Km/h"]} text={"Vitesse en: "}
+        onChange={changeUnit}
         />
       <DataTable>
         <DataTable.Header>
           <DataTable.Title className=" justify-center"> <Text className="text-slate-900 dark:text-slate-300">Heure</Text></DataTable.Title>
           <DataTable.Title className=" justify-center"><Text className="text-slate-900 dark:text-slate-300 ">Vent</Text><Icon name="weather-windy" size={16} color="blue" /></DataTable.Title>
           <DataTable.Title className=" justify-center"><Text className="text-slate-900 dark:text-slate-300">Rafales</Text><Icon name="weather-lightning" size={16} color="red" /></DataTable.Title>
-          <DataTable.Title className=" justify-center"><Text className="text-slate-900 dark:text-slate-300 ">Dir.</Text><Icon name="compass-outline" size={16} color="red" /></DataTable.Title>
+          <DataTable.Title className=" justify-center"><Text className="text-slate-900 dark:text-slate-300 ">Dir.</Text><Icon name="compass-outline" size={16} color="orange" /></DataTable.Title>
           <DataTable.Title className=" justify-center"><Text className="text-slate-900 dark:text-slate-300">Pluie</Text>  <Icon name="weather-rainy" size={16} color="gray" /></DataTable.Title>
-          <DataTable.Title className=" justify-center"><Text className="text-slate-900 dark:text-slate-300">Temp.</Text><Icon name="coolant-temperature" size={16} color="gray" /></DataTable.Title>
+          <DataTable.Title className=" justify-center"><Text className="text-slate-900 dark:text-slate-300">Temp.</Text><Icon name="coolant-temperature" size={16} color="green" /></DataTable.Title>
 
         </DataTable.Header>
 

@@ -27,7 +27,7 @@ const SelectList: React.FC<SelectListProps> = ({ options, onSelect, label, defau
   return (
     // permet d'ajouter les classes optionnelles
     <View className={`p-4 ${className ?? ""}`}> 
-      {/* si on a un label pn l'affiche */}
+      {/* si on a un label on l'affiche */}
       {label && <Text className="mb-2 text-lg  text-slate-600 dark:text-slate-50  font-bold">{label}</Text>}
       <View className="border border-gray-300 rounded">
         <Picker
