@@ -6,8 +6,8 @@ import icons from "constants/icons"
 // création d'un composant paramétrable
 const TabIcon= ({icon, color, name, focused}) => {
   return (
-    <View className='items-center justify-center gap-2'>
-      <Image className={` item-center ${focused ? " w-8 h-8" : "w-6 h-6"}`}
+    <View className='items-center justify-center gap-2 w-[100] h-[50] mt-5'>
+      <Image className={` item-center ${focused ? " w-9 h-9" : "w-6 h-6"}`}
       source={icon}
       resizeMode='contain'
       /> 
@@ -37,6 +37,8 @@ export default function TabsLayout() {
 <Tabs.Screen name="meteo" options = {{
 title: "Meteo",
 // headerShown: false,
+headerTitle: "Choisir un lieu",
+headerTintColor: "grey" ,
 tabBarIcon: ({color,focused}) => (
   <TabIcon 
   icon = {icons.weather}
@@ -61,7 +63,21 @@ tabBarIcon: ({color,focused}) => (
      
   />
 )
+      }}
+/>
 
+<Tabs.Screen name="autoPilot" options = {{
+title: "autoPilot",
+headerShown: false,
+tabBarIcon: ({color,focused}) => (
+  <TabIcon
+  icon = {icons.autoPilot}
+  color = {color}
+  name = "Auto-Pilot"
+  focused = {focused} 
+     
+  />
+)
       }}
 />
     </Tabs>

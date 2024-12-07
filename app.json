@@ -1,5 +1,10 @@
 {
   "expo": {
+    "splash": {
+      "image": "./assets/icons/sailboat.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "scheme": "acme",
     "newArchEnabled": true,
     "userInterfaceStyle": "automatic",
@@ -9,12 +14,32 @@
       "bundler": "metro"
     },
     "android": {
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyC90gyfaetvJFDa6uFJeHDhuelCWfu3Oc8"
+        }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
+      "package": "com.fabricekx.Sail"
     },
     "experiments": {
       "typedRoutes": true
     },
     "plugins": [
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "modes": ["peripheral", "central"],
+          "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices"
+        }
+      ],
       [
         "expo-router",
         {
@@ -23,8 +48,14 @@
       ]
     ],
     "name": "Sail",
-    "slug": "Sail"
+    "slug": "Sail",
+    "extra": {
+      "router": {
+        "origin": "https://n"
+      },
+      "eas": {
+        "projectId": "a7da9734-b2c1-4dd1-ad63-d7fe626e72ce"
+      }
+    }
   }
-  
-  
 }

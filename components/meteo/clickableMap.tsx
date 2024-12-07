@@ -1,7 +1,7 @@
 // ClickableMap.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import MapView, { Marker} from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import * as Location from 'expo-location';
 
 
@@ -42,6 +42,8 @@ const ClickableMap: React.FC<ClickableMapProps> = ({ onLocationSelect }) => {
     <View className='flex-1'>
       <MapView
         style={styles.map}
+        provider={PROVIDER_GOOGLE} // Définit le provider comme Google
+
         initialRegion={{
           latitude: currentLocation ? currentLocation.latitude : 43.537, // Exemple: Paris
           longitude: currentLocation ? currentLocation.longitude : 7.0355,

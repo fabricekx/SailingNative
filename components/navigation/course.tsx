@@ -89,6 +89,7 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
           setCurrentSpeed(speed !== null ? speed * 3.6 : 0); // Conversion en km/h
           setCourse(heading !== null ? heading : null);
 
+          // Si on est en mode tracking, on enregistre le reste (distance, vitesse Max)
           if (tracking) {
             // Calcul de la distance parcourue
             if (prevLocation) {
@@ -160,9 +161,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
   return (
     <View className="flex-row flex-wrap justify-between">
       {/* Vitesse actuelle */}
-      <View className="w-[45%] items-center bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-400">Vitesse (SOG) :</Text>
-        <Text className="text-5xl text-slate-400">
+      <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Vitesse (SOG) :</Text>
+        <Text className="text-5xl text-black dark:text-slate-400">
           {currentSpeed > 0
             ? unit === "Noeuds"
               ? `${(currentSpeed / 1.852).toFixed(1)} `
@@ -172,9 +173,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
       </View>
 
       {/* Cap actuel */}
-      <View className="w-[45%] items-center bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-400">Cap suivi (COG) :</Text>
-        <Text className="text-5xl text-slate-400">
+      <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Cap suivi (COG) :</Text>
+        <Text className="text-5xl text-black dark:text-slate-400">
           {currentSpeed >= 3 && course !== null
             ? `${course.toFixed(0)}°`
             : "..."}
@@ -182,9 +183,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
       </View>
 
       {/* Vitesse max */}
-      <View className="w-[45%] items-center bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-400">Vitesse Max :</Text>
-        <Text className="text-5xl text-slate-400">
+      <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Vitesse Max :</Text>
+        <Text className="text-5xl text-black dark:text-slate-400">
           {tracking
             ? unit === "Noeuds"
               ? `${(maxSpeed / 1.852).toFixed(1)} `
@@ -194,9 +195,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
       </View>
 
       {/* Vitesse moyenne */}
-      <View className="w-[45%] items-center bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-400">Vitesse Moy. :</Text>
-        <Text className="text-5xl text-slate-400">
+      <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Vitesse Moy. :</Text>
+        <Text className="text-5xl text-black dark:text-slate-400">
           {tracking
             ? unit === "Noeuds"
               ? `${(((distance * 3600) / trackingDuration) * 1.852).toFixed(
@@ -208,9 +209,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
       </View>
 
       {/* Distance parcourue */}
-      <View className="w-[45%] items-center bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-400">Lock :</Text>
-        <Text className="text-5xl text-slate-400">
+      <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Lock :</Text>
+        <Text className="text-5xl text-black dark:text-slate-400">
           {tracking
             ? unit === "Noeuds"
               ? `${(distance / 1.852).toFixed(2)} M`
@@ -220,9 +221,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
       </View>
 
       {/* Durée */}
-      <View className="w-[45%] items-center bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-400">Durée :</Text>
-        <Text className="text-3xl text-slate-400">
+      <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Durée :</Text>
+        <Text className="text-3xl text-black dark:text-slate-400">
           {formatDuration(trackingDuration)}
         </Text>
       </View>
