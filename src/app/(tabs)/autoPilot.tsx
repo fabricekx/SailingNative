@@ -13,7 +13,7 @@ import MainPilot from "components/autoPilot/mainPilot";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 
-const App = () => {
+const AutoPilot = () => {
   const {
     requestPermissions,
     scanForPeripherals,
@@ -133,4 +133,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default AutoPilot;

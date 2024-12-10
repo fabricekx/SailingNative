@@ -4,9 +4,10 @@ import Compas from 'components/navigation/compas'
 import Course from 'components/navigation/course'
 import ClickButton from 'components/usefull/clickButton'
 
-const navigation = () => {
+const Navigation = () => {
   const [unit, setUnit] = useState<string>("Noeuds"); 
   const changeUnit = (selectedUnit:string) => {setUnit(selectedUnit)}
+  const handle = () => {}
 
   return (
     <SafeAreaView className="bg-slate-400 dark:bg-slate-900 flex-1 ">
@@ -15,11 +16,11 @@ const navigation = () => {
         onChange={changeUnit}
         />
         <View className=' flex-1  items-center'>
-        <Compas/>
+        <Compas onHeadingChange={handle}/>
         <Course unit={unit}/>
         </View>
     </SafeAreaView>
   )
 }
 
-export default navigation
+export default Navigation

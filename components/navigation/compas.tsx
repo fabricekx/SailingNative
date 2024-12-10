@@ -1,43 +1,48 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Text, View } from 'react-native';
-import { Magnetometer } from 'expo-sensors';
+import Indicator from 'ts/sensorFusion'; // utilise la bibliothèque sensorFusion pour simplifier et avoir plus de précision
 
-const Compas: React.FC = () => {
-  const [heading, setHeading] = useState<number | null>(null);
-  const valuesRef = useRef<number[]>([]); // Utilisation de useRef pour stocker les valeurs
 
+interface CompasProps {
+  onHeadingChange: (heading: number | null) => void; // props qui sera transmise au parent (voir mainPilot)
+}       // C'est forcement une fonction
+
+const Compas: React.FC<CompasProps> = ({ onHeadingChange }) => {
+  const [heading, setHeading] = useState<number | null>(null); // Cap moyen calculé
+  const valuesRef = useRef<number[]>([]); // Stockage des dernières valeurs. Le HookRef permet de stocker des variables sans rendre le composant à chaque modif
+
+  const { heading: currentHeading } = Indicator(); // Récupérer le heading fusionné de Indicator
+// NB: la syntaxe si dessus est de la Déstructuration d'objet: ça signifie simplement que le heading provenant de Indicator est renommée currentHeading, pour la différencier de notre variable heading déjà existante
   useEffect(() => {
-    // Ajouter un listener pour le capteur
-    const subscription = Magnetometer.addListener((data) => {
-      const { x, y } = data;
-      const angle = Math.atan2(y, x) * (180 / Math.PI);
-      const headingValue = angle >= 0 ? angle : angle + 360;
-
-      // Ajouter la nouvelle valeur en gardant uniquement les 5 dernières
-      if (valuesRef.current.length >= 5) {
-        valuesRef.current.shift(); // Supprimer la valeur la plus ancienne
-      }
-      valuesRef.current.push(headingValue); // Ajouter la nouvelle valeur
-    });
-
-    // Calculer la moyenne toutes les secondes
+    // Fonction de mise à jour des valeurs
     const interval = setInterval(() => {
-      if (valuesRef.current.length > 0) {
+      if (currentHeading !== null) {
+        // Ajouter la nouvelle valeur en gardant uniquement les 5 dernières
+        if (valuesRef.current.length >= 5) {
+          valuesRef.current.shift(); // Supprimer la plus ancienne
+        }
+        valuesRef.current.push(currentHeading); // Ajouter la nouvelle valeur
+
+        // Calculer la moyenne des 5 dernières valeurs
         const average =
           valuesRef.current.reduce((a, b) => a + b, 0) / valuesRef.current.length;
-        setHeading(parseFloat(average.toFixed(1))); // Mettre à jour le cap
+        setHeading(parseFloat(average.toFixed(1))); // Mettre à jour le cap moyen
       }
-    }, 1000);
+    }, 1000); // Met à jour toutes les secondes
 
-    // Nettoyer l'effet (désactiver le listener et le timer)
-    return () => {
-      subscription.remove(); // Supprimer l'abonnement au capteur
-      clearInterval(interval); // Supprimer l'intervalle
-    };
-  }, []);
+    // Nettoyage : supprimer l'intervalle
+    return () => clearInterval(interval);
+  }, [currentHeading]); // Relancer si currentHeading change
 
 
-  return (
+  useEffect(() => { // syntaxe useEffect() => fonction, depandences?
+    if (heading !== null) {
+      onHeadingChange(heading); // Transmettre le heading au parent
+    }
+  }, [heading]);
+
+
+  return  (
     <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
       <Text className="text-xl text-blue-800 dark:text-blue-400">
         Cap compas : 
