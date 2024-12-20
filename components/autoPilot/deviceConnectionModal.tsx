@@ -66,7 +66,7 @@ const DeviceModal: FC<DeviceModalProps> = (props) => {
     >
       <SafeAreaView style={modalStyle.modalTitle}>
         <Text style={modalStyle.modalTitleText}>
-          Selectionner le relais Bluetooth"
+          Selectionner le relais Bluetooth
         </Text>
         <FlatList
           contentContainerStyle={modalStyle.modalFlatlistContiner}

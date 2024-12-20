@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import { StyleSheet, View, ScrollView, Dimensions } from "react-native";
+import { StyleSheet, View, ScrollView, Dimensions, Text } from "react-native";
 import ClickableMap from "components/meteo/clickableMap";
 import FetchMeteo from "components/meteo/fetchMeteo";
 
@@ -18,6 +18,7 @@ const Meteo = () => {
     <View  style={{height:screenHeight , alignItems: "center"}}>
       <View style={styles.container}>
         <ClickableMap onLocationSelect={handleLocationSelect} />
+        <Text className="text-xs  text-slate-900 dark:text-slate-600">Origine Meteo France (Arome/Arpege)</Text>
       </View>
       <FetchMeteo
         latitude={coordinates.latitude}

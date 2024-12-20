@@ -1,10 +1,10 @@
 import { View, Text, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Compas from 'components/navigation/compas';
 import relais from 'ts/relais';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Device } from 'react-native-ble-plx';
-import pilotActuator from 'ts/pilotActuator';
+import ActuatorController from 'ts/pilotActuator';
 
 interface MainPilotProps {
   connectedDevice: Device | null;
@@ -16,14 +16,17 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
     relais1Open,
     relais2Close,
     relais2Open,
-    relais1State,
-    relais2State,
+    
     
   } = relais();
 
   const [heading, setHeading] = useState<number | null>(null);
   const [capAsked, setCapAsked] = useState<number | null>(null);
   const [isPilotStarted, setIsPilotSarted] = useState<boolean>(false);
+  const [openingTimeMax, setOpeningTimeMax] = useState<number>(3000) // temps d'ouverture maximum des relais depuis la barre au milieu
+
+// Utiliser useRef pour une instance persistante de ActuatorController
+const controllerRef = useRef(new ActuatorController());
 
   const startPilot = () => {
     if (heading !== null) {
@@ -45,7 +48,8 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
 // des valeurs actuelles, on le met dans un useEffect
   useEffect(() => {
     if (isPilotStarted && heading !== null && capAsked !== null) {
-      pilotActuator( // ceci n'étant pas un composant React, et comme il fait appel à des hooks (des useState dans les relais),
+      controllerRef.current.pilotActuator( // le fait d'utiliser useRef.curent évite qu'une nouvelle instance de pilotActuator ne soit créé à chaque actualisation
+        // ceci n'étant pas un composant React, et comme il fait appel à des hooks (des useState dans les relais),
         capAsked,   // il faut que ces fonctions qui appellent les hook soient passées en argument de la fonction principale.
         heading,
         10,
@@ -53,9 +57,7 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
         relais1Open,
         relais2Close,
         relais2Open,
-        relais1State,
-        relais2State,
-        connectedDevice
+        connectedDevice,
       );
     }
   }, [isPilotStarted, heading, capAsked]);
