@@ -16,7 +16,7 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
     relais1Open,
     relais2Close,
     relais2Open,
-    
+   
     
   } = relais();
 
@@ -26,7 +26,7 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
   const [openingTimeMax, setOpeningTimeMax] = useState<number>(3000) // temps d'ouverture maximum des relais depuis la barre au milieu
 
 // Utiliser useRef pour une instance persistante de ActuatorController
-const controllerRef = useRef(new ActuatorController());
+  const controllerRef = useRef(new ActuatorController());
 
   const startPilot = () => {
     if (heading !== null) {
@@ -57,7 +57,9 @@ const controllerRef = useRef(new ActuatorController());
         relais1Open,
         relais2Close,
         relais2Open,
+   
         connectedDevice,
+        openingTimeMax,
       );
     }
   }, [isPilotStarted, heading, capAsked]);
