@@ -12,7 +12,9 @@ const Navigation = () => {
   return (
     <SafeAreaView className="bg-slate-400 dark:bg-slate-900 flex-1 ">
    
-        <ClickButton values={["Noeuds","Km/h"]} text={"Vitesse en: "}
+        <ClickButton values={["Noeuds","Km/h"]} 
+        selectedValue={unit}
+        text={"Vitesse en: "}
         onChange={changeUnit}
         />
         <View className=' flex-1  items-center'>

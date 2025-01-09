@@ -3,16 +3,15 @@ import React, { useState } from 'react';
 
 interface ClickButtonProps {
   values: [string, string]; 
+  selectedValue: string;
   text?: string;
   onChange ?: (selectedValue: string)=>void
 }
 
-const ClickButton: React.FC<ClickButtonProps> = ({ values, text, onChange }) => {
-  const [value, setValue] = useState(values[0]);
+const ClickButton: React.FC<ClickButtonProps> = ({ values,selectedValue, text, onChange }) => {
 
   const onPress = () => {
-    const newValue = value === values[0] ? values[1] : values[0];
-    setValue(newValue); // Mettre à jour la valeur
+    const newValue = selectedValue === values[0] ? values[1] : values[0];
     if (onChange) {  // onChange est optionnel
       onChange(newValue); // Passer la nouvelle valeur au parent
     }
@@ -27,7 +26,7 @@ const ClickButton: React.FC<ClickButtonProps> = ({ values, text, onChange }) => 
         onPress={onPress}
         className= {` px-4 py-2 w-1/4 bg-blue-500 dark:bg-blue-900 rounded-md ` }
       >
-        <Text className="text-white dark:text-slate-600 text-xl">{value}</Text>
+        <Text className="text-white dark:text-slate-600 text-xl">{selectedValue}</Text>
       </TouchableOpacity>
     </View>
   );

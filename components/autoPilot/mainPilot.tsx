@@ -1,16 +1,24 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import Compas from 'components/navigation/compas';
 import relais from 'ts/relais';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icons from 'react-native-vector-icons/Ionicons';
+
 import { Device } from 'react-native-ble-plx';
 import ActuatorController from 'ts/pilotActuator';
+import ConfigTiller from './configTiller';
 
 interface MainPilotProps {
   connectedDevice: Device | null;
 }
 
 const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
+  const [isConfigVisible, setIsConfigVisible] = useState(false); // État pour afficher/masquer la vue contextuelle
+  // const [openingTimeMaxBabord, setOpeningTimeMaxBabord] = useState<number>(3000);
+  // const [openingTimeMaxTribord, setOpeningTimeMaxTribord] = useState<number>(3000);
+
+  
   const {
     relais1Close,
     relais1Open,
@@ -23,7 +31,7 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
   const [heading, setHeading] = useState<number | null>(null);
   const [capAsked, setCapAsked] = useState<number | null>(null);
   const [isPilotStarted, setIsPilotSarted] = useState<boolean>(false);
-  const [openingTimeMax, setOpeningTimeMax] = useState<number>(3000) // temps d'ouverture maximum des relais depuis la barre au milieu
+  // const [openingTimeMax, setOpeningTimeMax] = useState<number>(3000) // temps d'ouverture maximum des relais depuis la barre au milieu
 
 // Utiliser useRef pour une instance persistante de ActuatorController
   const controllerRef = useRef(new ActuatorController());
@@ -59,7 +67,6 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
         relais2Open,
    
         connectedDevice,
-        openingTimeMax,
       );
     }
   }, [isPilotStarted, heading, capAsked]);
@@ -67,6 +74,12 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
       return (
     
     <View className='flex items-center justify-between'>
+      <Pressable
+          onPress={() => setIsConfigVisible(!isConfigVisible)}>
+      <Icons name="settings-outline" size={30} color="gray" /> 
+       </Pressable>
+      <ConfigTiller/>
+      {/* <Text>Sens {sens}</Text> */}
         <Compas onHeadingChange={handleHeadingChange}/>
         <View className='flex flex-row items-center justify-between'>
 

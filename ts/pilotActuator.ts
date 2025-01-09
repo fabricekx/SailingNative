@@ -1,4 +1,5 @@
 import { Device } from "react-native-ble-plx";
+import { appConfig } from 'ts/appConfig';
 
 class ActuatorController {
   private relais1CloseTimestamp: number | null = null;
@@ -12,6 +13,8 @@ class ActuatorController {
   private isBarreBabord: boolean = false;
   private isBarreTribord: boolean = false;
   private isBarreCentered: boolean = true;
+private openingTimeMaxTribord: number = 0;
+private openingTimeMaxBabord: number = 0;
 
   private countnumberdeviation: number =0
 
@@ -67,8 +70,11 @@ return false  } // le cap ne  s'améliore pas
     relais2Open: (device: Device) => Promise<void>,
 
     device: Device,
-    openingTimeMax: number
   ) {
+// Ces valeur proviennent de mon objet config et peuvent etre configurées dans configTiller
+    this.openingTimeMaxBabord = appConfig.openingTimeMaxBabord;
+    this.openingTimeMaxTribord = appConfig.openingTimeMaxTribord;
+
     const deviation = this.calculateDeviation(capAsked, heading); // number, différence en degrés,comprose entre -180 (déviation à tribord)
     //  et +180 (déviation à babord)
 
@@ -92,11 +98,11 @@ return false  } // le cap ne  s'améliore pas
         console.log("relais1ActiveTime : ", this.relais1ActiveTime);
         console.log("lastDeviation : ", this.lastDeviations);
         console.log("amélioration du cap : ", this.isDeviationBetter());
-        if (this.relais1ActiveTime >= openingTimeMax) { // si barre a tribord toute
+        if (this.relais1ActiveTime >= this.openingTimeMaxTribord) { // si barre a tribord toute
           console.log("CAS 1: durée maximale atteinte")
           await relais1Open(device); // on arrete la barre
           this.isActuatorRunning = false;
-          this.relais1ActiveTime = openingTimeMax; 
+          this.relais1ActiveTime = this.openingTimeMaxTribord; 
         } else if (this.isDeviationBetter()===true && this.isActuatorRunning) {
           //sinon si le cap s'améliore et que la barre est en mouvement
           console.log("CAS 2: le cap s'améliore, arret du verrin")
@@ -138,10 +144,10 @@ console.log("on a un serieux problème tribord")
         this.isActuatorRunning = true;
         this.isBarreCentered = false;
       } else if (this.isBarreBabord) {
-        if (this.relais2ActiveTime >= openingTimeMax) { // si barre a babord toute
+        if (this.relais2ActiveTime >= this.openingTimeMaxBabord) { // si barre a babord toute
           await relais2Open(device); // on arrete la barre
           this.isActuatorRunning = false;
-          this.relais2ActiveTime = openingTimeMax; 
+          this.relais2ActiveTime = this.openingTimeMaxBabord; 
         } else if (this.isDeviationBetter()===true && this.isActuatorRunning) { // ici la déviation est négative
           //sinon si le cap s'améliore et que la barre est en mouvement
           await relais2Open(device); // on l'arrete
@@ -175,8 +181,11 @@ console.log("on a un serieux problème babord")
       await relais2Close(device) ;// on inverse le verrin
       if (this.countnumberdeviation >2){ // si ça fait 3 fois que le bateau dérive à babord
 // on va modifier le centre en diminuant le temps du relais1ActiveTime
-this.relais1ActiveTime =- openingTimeMax/10;
-console.log(" le tems de remise au centre a été modifié")
+this.relais1ActiveTime =- this.openingTimeMaxTribord/10;
+console.log(" le temps de remise au centre a été modifié")
+// il faut aussi modifier le temps d'ouverture maximum à tribord et l'augmenter d'autant à babord
+this.openingTimeMaxTribord-=this.openingTimeMaxTribord/10
+this.openingTimeMaxBabord+=this.openingTimeMaxTribord/10
       }
       setTimeout(async () => { // on le rouvre pour le ramener au centre
         relais2Open(device)
@@ -194,8 +203,10 @@ console.log(" le tems de remise au centre a été modifié")
       await relais1Close(device) ;// on inverse le verrin
       if (this.countnumberdeviation <-2){ // si ça fait 3 fois que le bateau dérive à tribord
 // on va modifier le centre en diminuant le temps du relais1ActiveTime
-this.relais2ActiveTime =- openingTimeMax/10;
-console.log(" le tems de remise au centre a été modifié")
+this.relais2ActiveTime =- this.openingTimeMaxBabord/10;
+console.log(" le temps de remise au centre a été modifié")
+this.openingTimeMaxBabord-= this.openingTimeMaxBabord/10
+this.openingTimeMaxTribord+= this.openingTimeMaxBabord/10
       }
       setTimeout(async () => { // on le rouvre pour le ramener au centre
         relais1Open(device)
@@ -209,38 +220,7 @@ console.log(" le tems de remise au centre a été modifié")
       this.lastDeviations=[0,0]
     }
     }
-    // else {
-    //   // Dans la tolérance : Réouvrir les relais et corriger pour ramener au centre
-    //   if (this.relais1CloseTimestamp) {
-    //     console.log("Ouverture du relais 1 (dans la tolérance).");
-    //     await relais1Open(device);
-
-    //     // Calculer le temps d'activation du relais 1
-    //     const now = Date.now();
-    //     this.relais1ActiveTime = now - this.relais1CloseTimestamp;
-    //     this.relais1CloseTimestamp = null;
-
-    //     // Activer relais 2 pour ramener au centre
-    //     if (this.relais1ActiveTime) {
-    //       console.log(
-    //         `Fermeture temporaire du relais 2 pour ramener au centre (durée : ${this.relais1ActiveTime}ms).`
-    //       );
-    //       await relais2Close(device);
-
-    //       setTimeout(async () => {
-    //         console.log("Ouverture du relais 2 (ramené au centre).");
-    //         await relais2Open(device);
-    //         this.relais2CloseTimestamp = null;
-    //       }, this.relais1ActiveTime);
-    //     }
-    //   }
-
-    //   if (this.relais2CloseTimestamp) {
-    //     console.log("Ouverture du relais 2 (dans la tolérance).");
-    //     await relais2Open(device);
-    //     this.relais2CloseTimestamp = null;
-    //   }
-    // }
+    
   }
 
 

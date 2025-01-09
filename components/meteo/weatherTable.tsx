@@ -49,7 +49,9 @@ const rainColor = (rain) => {
 
   return (
     <View className="bg-slate-400 dark:bg-slate-900" >
-     <ClickButton values={["Noeuds","Km/h"]} text={"Vitesse en: "}
+     <ClickButton values={["Noeuds","Km/h"]} 
+     selectedValue={unit}
+     text={"Vitesse en: "}
         onChange={changeUnit}
         />
       <DataTable>

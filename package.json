@@ -45,7 +45,8 @@
     "react-native-svg": "15.8.0",
     "react-native-web": "~0.18.11",
     "tailwindcss": "^3.4.0",
-    "victory-native": "^41.9.0"
+    "victory-native": "^41.9.0",
+    "@react-native-async-storage/async-storage": "1.23.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
