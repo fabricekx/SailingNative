@@ -1,40 +1,57 @@
 import { View, Text, TouchableOpacity, Pressable } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import Compas from 'components/navigation/compas';
-import relais from 'ts/relais';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icons from 'react-native-vector-icons/Ionicons';
 
 import { Device } from 'react-native-ble-plx';
 import ActuatorController from 'ts/pilotActuator';
 import ConfigTiller from './configTiller';
+import {appConfig} from 'ts/appConfig';
+import Relais from 'ts/relais';
 
+// console.log('MainPilot component loaded');
+// const testInstance = new ActuatorController();
+// console.log(testInstance);
 interface MainPilotProps {
-  connectedDevice: Device | null;
+  connectedDevice: Device | null ;
 }
 
 const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
   const [isConfigVisible, setIsConfigVisible] = useState(false); // État pour afficher/masquer la vue contextuelle
-  // const [openingTimeMaxBabord, setOpeningTimeMaxBabord] = useState<number>(3000);
-  // const [openingTimeMaxTribord, setOpeningTimeMaxTribord] = useState<number>(3000);
 
   
-  const {
-    relais1Close,
-    relais1Open,
-    relais2Close,
-    relais2Open,
-   
-    
-  } = relais();
+  
 
   const [heading, setHeading] = useState<number | null>(null);
   const [capAsked, setCapAsked] = useState<number | null>(null);
   const [isPilotStarted, setIsPilotSarted] = useState<boolean>(false);
-  // const [openingTimeMax, setOpeningTimeMax] = useState<number>(3000) // temps d'ouverture maximum des relais depuis la barre au milieu
+
+  /* POUR CONFIG */
+const [isTimeMaxTribordVisible,setIsTimeMaxTribordVisible]= useState<boolean>(false);
+const handleIsTimeMaxTriVisible = (isVisible:boolean) => {setIsTimeMaxTribordVisible(isVisible)}
+const setTimeMaxTribor = (debutTribord:number, finTribord:number) => {
+  appConfig.openingTimeMaxTribord=(finTribord-debutTribord)
+}
+let fermeture:number;
+let ouverture:number;
+
+
+/* FIN CONFIG*/
 
 // Utiliser useRef pour une instance persistante de ActuatorController
-  const controllerRef = useRef(new ActuatorController());
+const myPilot = useRef<ActuatorController | null>(null);
+
+useEffect(() => {
+  console.log('useEffect called');
+  try {
+    myPilot.current = new ActuatorController();
+    console.log('myPilot instance:', myPilot.current);
+  } catch (error) {
+    console.error('Error initializing ActuatorController:', error);
+  }
+}, []);
+
 
   const startPilot = () => {
     if (heading !== null) {
@@ -54,22 +71,18 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
   };
 //  pour s'assurer que le pilotActuator soit appelé si il y a un changement de cap, d'activation etc et qu'il utilise 
 // des valeurs actuelles, on le met dans un useEffect
-  useEffect(() => {
-    if (isPilotStarted && heading !== null && capAsked !== null) {
-      controllerRef.current.pilotActuator( // le fait d'utiliser useRef.curent évite qu'une nouvelle instance de pilotActuator ne soit créé à chaque actualisation
-        // ceci n'étant pas un composant React, et comme il fait appel à des hooks (des useState dans les relais),
-        capAsked,   // il faut que ces fonctions qui appellent les hook soient passées en argument de la fonction principale.
-        heading,
-        10,
-        relais1Close,
-        relais1Open,
-        relais2Close,
-        relais2Open,
-   
-        connectedDevice,
-      );
-    }
-  }, [isPilotStarted, heading, capAsked]);
+useEffect(() => {
+  if (isPilotStarted && heading !== null && capAsked !== null && myPilot.current && connectedDevice !== null) {
+    myPilot.current.pilotActuator(
+      capAsked,
+      heading,
+      10,
+      connectedDevice,
+    );
+  } else if (!myPilot.current) {
+    console.warn('myPilot is not initialized');
+  }
+}, [isPilotStarted, heading, capAsked]);
 
       return (
     
@@ -78,18 +91,51 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
           onPress={() => setIsConfigVisible(!isConfigVisible)}>
       <Icons name="settings-outline" size={30} color="gray" /> 
        </Pressable>
-      <ConfigTiller/>
-      {/* <Text>Sens {sens}</Text> */}
+      {/* {isConfigVisible && myPilot.current && <ConfigTiller handleVisibleTri= {handleIsTimeMaxTriVisible}
+      myPilot={myPilot.current}/>} 
+      <Text>Sens {appConfig.sens}</Text> */}
         <Compas onHeadingChange={handleHeadingChange}/>
         <View className='flex flex-row items-center justify-between'>
 
 {/* Bouton gauche: si PilotStarted on modifiel le CapAsked, sinon on actionne le verrin */}
-        <TouchableOpacity  
-              onPressIn={isPilotStarted? () =>{setCapAsked(capAsked-5); capAsked<0 && setCapAsked(capAsked+360)}: () => relais1Close(connectedDevice)} 
-              onPressOut={isPilotStarted ? undefined : () => relais1Open(connectedDevice)}
+<TouchableOpacity
+  onPressIn={() => {
+    if (isPilotStarted) {
+      // Mode pilote démarré
+      const newCap = capAsked! - 5;
+      setCapAsked(newCap < 0 ? newCap + 360 : newCap);
+    } else {
+      // Mode manuel
+      
+        myPilot.current!.turnToDirection("babord",connectedDevice!);
+      } 
+      if (isTimeMaxTribordVisible) {
+        fermeture = Date.now(); // Assurez-vous que "fermeture" est déclarée dans le scope
+      }
+    }
+  }
+  onPressOut={
+    isPilotStarted
+      ? undefined // Pas d'action en mode pilote
+      : () => {
+          // Mode manuel
+          myPilot.current!.stopTurn(connectedDevice!)
+          if (isTimeMaxTribordVisible) {
+            ouverture = Date.now(); 
+            setTimeMaxTribor(fermeture,ouverture)
+
+          }
+        }
+  }
 >
-  {isPilotStarted? <View className=" w-[75px] h-[77px] rounded-lg p-2 m-2 bg-red-700"><Text className=' text-5xl text-slate-400 text-center pt-3' >-5</Text></View> : <Icon name="arrow-left-bold-box" size={100} color="red" /> }
-          </TouchableOpacity>
+  {isPilotStarted ? (
+    <View className="w-[75px] h-[77px] rounded-lg p-2 m-2 bg-red-700">
+      <Text className="text-5xl text-slate-400 text-center pt-3">-5</Text>
+    </View>
+  ) : (
+    <Icon name="arrow-left-bold-box" size={100} color="red" />
+  )}
+</TouchableOpacity>
 
 
 {/* Boutton start pilot, affiche start ou le cap demandé */}
@@ -99,7 +145,7 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
         <Text className="text-xl text-blue-800 dark:text-blue-400">
                 Pilot 
               </Text>
-        <Text className="text-4xl text-green-500 dark:text-green-900"> {capAsked.toFixed(0)}°</Text>
+        <Text className="text-4xl text-green-500 dark:text-green-900"> {capAsked!.toFixed(0)}°</Text>
         <Text>Click to Stop</Text>
         </View>
              :
@@ -111,10 +157,38 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
        
         </TouchableOpacity>
 
-        <TouchableOpacity 
-onPressIn={isPilotStarted? () =>{setCapAsked(capAsked+5); capAsked>360 && setCapAsked(capAsked-360)}: () => relais1Close(connectedDevice)} 
-onPressOut={isPilotStarted ? undefined : () => relais1Open(connectedDevice)}>
-  {isPilotStarted? <View className=" w-[75px] h-[77px] rounded-lg p-2 m-2 bg-green-700"><Text className=' text-5xl text-slate-400 text-center pt-3' >+5</Text></View> :<Icon name="arrow-right-bold-box" size={100} color="green" />     }     </TouchableOpacity>
+
+
+        {/* Bouton Droit */}
+        <TouchableOpacity
+  onPressIn={() => {
+    if (isPilotStarted) {
+      // Mode pilote démarré
+      const newCap = capAsked! + 5;
+      setCapAsked(newCap > 360 ? newCap - 360 : newCap);
+    } else {
+      // Mode manuel
+      myPilot.current!.turnToDirection("tribord",connectedDevice!)
+    }
+  }}
+  onPressOut={
+    isPilotStarted
+      ? undefined // Pas d'action en mode pilote
+      : () => {
+          // Mode manuel
+          myPilot.current!.stopTurn(connectedDevice!)
+        }
+  }
+>
+  {isPilotStarted ? (
+    <View className="w-[75px] h-[77px] rounded-lg p-2 m-2 bg-green-700">
+      <Text className="text-5xl text-slate-400 text-center pt-3">+5</Text>
+    </View>
+  ) : (
+    <Icon name="arrow-right-bold-box" size={100} color="green" />
+  )}
+</TouchableOpacity>
+
         </View>
         
 

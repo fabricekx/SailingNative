@@ -8,9 +8,7 @@ import {
 } from "react-native";
 import DeviceModal from "components/autoPilot/deviceConnectionModal";
 import useBLE from "ts/useBLE";
-import relais from "ts/relais";
 import MainPilot from "components/autoPilot/mainPilot";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 
 const AutoPilot = () => {
@@ -22,7 +20,6 @@ const AutoPilot = () => {
     connectedDevice,
     disconnectFromDevice,
   } = useBLE();
-  const {relais1Close, relais1Open, relais2Close, relais2Open, relais1State, relais2State} = relais();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const scanForDevices = async () => {
@@ -46,11 +43,6 @@ const AutoPilot = () => {
       <View style={styles.heartRateTitleWrapper}>
         {connectedDevice ? (
           <MainPilot connectedDevice={connectedDevice}></MainPilot>
-            
-            
-             
-          
-          
         ) : (
           <Text style={styles.heartRateTitleText}>
             Cette fonction nécessite un relais Bluetooth. Plus d'info sur fabricekx@gmail.com
