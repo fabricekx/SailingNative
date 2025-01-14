@@ -25,6 +25,7 @@ class Config {
           const configString = await AsyncStorage.getItem('config');
           if (configString) {
             const configObject = JSON.parse(configString);
+            // console.log("configObjetc: ", configObject )
             return new Config(configObject);
           }
         } catch (error) {

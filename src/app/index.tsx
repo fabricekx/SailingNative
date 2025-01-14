@@ -4,18 +4,14 @@ import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { appConfig } from 'ts/appConfig';
 import Config from 'ts/config';
+import { loadAppConfig } from "ts/appConfig";
+
 
 export default function Page() {
   useEffect(() => {
-    // Charger la configuration depuis AsyncStorage au démarrage
-    const loadConfig = async () => {
-      const loadedConfig = await Config.loadFromStorage();
-      Object.assign(appConfig, loadedConfig); // Met à jour l'instance globale
-    };
-    loadConfig();
+    loadAppConfig(); // Appelle simplement la méthode centralisée
   }, []);
   return (
 <Redirect href="/(tabs)/meteo"/>
   )
 }
-
