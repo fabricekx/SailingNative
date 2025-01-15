@@ -4,6 +4,7 @@ import Compas from 'components/navigation/compas';
 import relais from 'ts/relais';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icons from 'react-native-vector-icons/Ionicons';
+import {appConfig} from 'ts/appConfig';
 
 import { Device } from 'react-native-ble-plx';
 import ActuatorController from 'ts/pilotActuator';
@@ -28,13 +29,27 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
     
   } = relais();
 
+  
   const [heading, setHeading] = useState<number | null>(null);
   const [capAsked, setCapAsked] = useState<number | null>(null);
   const [isPilotStarted, setIsPilotSarted] = useState<boolean>(false);
   // const [openingTimeMax, setOpeningTimeMax] = useState<number>(3000) // temps d'ouverture maximum des relais depuis la barre au milieu
 
 // Utiliser useRef pour une instance persistante de ActuatorController
-  const controllerRef = useRef(new ActuatorController());
+  const myPilot = useRef(new ActuatorController());
+
+
+   /* POUR CONFIG */
+const [isTimeMaxTribordVisible,setIsTimeMaxTribordVisible]= useState<boolean>(false);
+const handleIsTimeMaxTriVisible = (isVisible:boolean) => {setIsTimeMaxTribordVisible(isVisible)}
+const setTimeMaxTribor = (debutTribord:number, finTribord:number) => {
+  appConfig.openingTimeMaxTribord=(finTribord-debutTribord)
+}
+let fermeture:number;
+let ouverture:number;
+
+
+/* FIN CONFIG*/
 
   const startPilot = () => {
     if (heading !== null) {
@@ -56,7 +71,7 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
 // des valeurs actuelles, on le met dans un useEffect
   useEffect(() => {
     if (isPilotStarted && heading !== null && capAsked !== null) {
-      controllerRef.current.pilotActuator( // le fait d'utiliser useRef.curent évite qu'une nouvelle instance de pilotActuator ne soit créé à chaque actualisation
+      myPilot.current.pilotActuator( // le fait d'utiliser useRef.curent évite qu'une nouvelle instance de pilotActuator ne soit créé à chaque actualisation
         // ceci n'étant pas un composant React, et comme il fait appel à des hooks (des useState dans les relais),
         capAsked,   // il faut que ces fonctions qui appellent les hook soient passées en argument de la fonction principale.
         heading,
