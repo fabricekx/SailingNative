@@ -88,53 +88,126 @@ let ouverture:number;
 
       return (
     
-    <View className='flex items-center justify-between'>
-      <Pressable
-          onPress={() => setIsConfigVisible(!isConfigVisible)}>
-      <Icons name="settings-outline" size={30} color="gray" /> 
-       </Pressable>
-      <ConfigTiller/>
-      {/* <Text>Sens {sens}</Text> */}
-        <Compas onHeadingChange={handleHeadingChange}/>
-        <View className='flex flex-row items-center justify-between'>
-
-{/* Bouton gauche: si PilotStarted on modifiel le CapAsked, sinon on actionne le verrin */}
-        <TouchableOpacity  
-              onPressIn={isPilotStarted? () =>{setCapAsked(capAsked-5); capAsked<0 && setCapAsked(capAsked+360)}: () => relais1Close(connectedDevice)} 
-              onPressOut={isPilotStarted ? undefined : () => relais1Open(connectedDevice)}
->
-  {isPilotStarted? <View className=" w-[75px] h-[77px] rounded-lg p-2 m-2 bg-red-700"><Text className=' text-5xl text-slate-400 text-center pt-3' >-5</Text></View> : <Icon name="arrow-left-bold-box" size={100} color="red" /> }
-          </TouchableOpacity>
-
-
-{/* Boutton start pilot, affiche start ou le cap demandé */}
-        <TouchableOpacity className=" w-40 min-h-32 items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2" onPress={isPilotStarted? stopPilot: startPilot}>
-       {isPilotStarted? 
-       <View className=' flex-1 justify-between items-center'>
-        <Text className="text-xl text-blue-800 dark:text-blue-400">
-                Pilot 
-              </Text>
-        <Text className="text-4xl text-green-500 dark:text-green-900"> {capAsked.toFixed(0)}°</Text>
-        <Text>Click to Stop</Text>
-        </View>
-             :
-             <View className='flex-1 '>
-               <Text className="text-xl text-blue-800 dark:text-blue-400">Pilot </Text>
-              <Text className="text-4xl text-black dark:text-slate-400">Start</Text>
-              </View>
-              }
-       
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-onPressIn={isPilotStarted? () =>{setCapAsked(capAsked+5); capAsked>360 && setCapAsked(capAsked-360)}: () => relais1Close(connectedDevice)} 
-onPressOut={isPilotStarted ? undefined : () => relais1Open(connectedDevice)}>
-  {isPilotStarted? <View className=" w-[75px] h-[77px] rounded-lg p-2 m-2 bg-green-700"><Text className=' text-5xl text-slate-400 text-center pt-3' >+5</Text></View> :<Icon name="arrow-right-bold-box" size={100} color="green" />     }     </TouchableOpacity>
-        </View>
+        <View className='flex items-center justify-between'>
+        <Pressable
+            onPress={() => setIsConfigVisible(!isConfigVisible)}>
+        <Icons name="settings-outline" size={30} color="gray" /> 
+         </Pressable>
+        {/* {isConfigVisible && myPilot.current && <ConfigTiller handleVisibleTri= {handleIsTimeMaxTriVisible}
+        myPilot={myPilot.current}/>} 
+        <Text>Sens {appConfig.sens}</Text> */}
+          <Compas onHeadingChange={handleHeadingChange}/>
+          <View className='flex flex-row items-center justify-between'>
+  
+  {/* Bouton gauche: si PilotStarted on modifiel le CapAsked, sinon on actionne le verrin */}
+  <TouchableOpacity
+    onPressIn={() => {
+      if (isPilotStarted) {
+        // Mode pilote démarré
+        const newCap = capAsked! - 5;
+        setCapAsked(newCap < 0 ? newCap + 360 : newCap);
+      } else {
+        // Mode manuel
         
-
-    </View>
-  )
+          myPilot.current!.turnToDirection("babord",connectedDevice!,relais1Close,
+            relais1Open,
+            relais2Close,
+            relais2Open,);
+        } 
+        if (isTimeMaxTribordVisible) {
+          fermeture = Date.now(); // Assurez-vous que "fermeture" est déclarée dans le scope
+        }
+      }
+    }
+    onPressOut={
+      isPilotStarted
+        ? undefined // Pas d'action en mode pilote
+        : () => {
+            // Mode manuel
+            myPilot.current!.stopTurn(connectedDevice!,relais1Close,
+              relais1Open,
+              relais2Close,
+              relais2Open,)
+            if (isTimeMaxTribordVisible) {
+              ouverture = Date.now(); 
+              setTimeMaxTribor(fermeture,ouverture)
+  
+            }
+          }
+    }
+  >
+    {isPilotStarted ? (
+      <View className="w-[75px] h-[77px] rounded-lg p-2 m-2 bg-red-700">
+        <Text className="text-5xl text-slate-400 text-center pt-3">-5</Text>
+      </View>
+    ) : (
+      <Icon name="arrow-left-bold-box" size={100} color="red" />
+    )}
+  </TouchableOpacity>
+  
+  
+  {/* Boutton start pilot, affiche start ou le cap demandé */}
+          <TouchableOpacity className=" w-40 min-h-32 items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2" onPress={isPilotStarted? stopPilot: startPilot}>
+         {isPilotStarted? 
+         <View className=' flex-1 justify-between items-center'>
+          <Text className="text-xl text-blue-800 dark:text-blue-400">
+                  Pilot 
+                </Text>
+          <Text className="text-4xl text-green-500 dark:text-green-900"> {capAsked!.toFixed(0)}°</Text>
+          <Text>Click to Stop</Text>
+          </View>
+               :
+               <View className='flex-1 '>
+                 <Text className="text-xl text-blue-800 dark:text-blue-400">Pilot </Text>
+                <Text className="text-4xl text-black dark:text-slate-400">Start</Text>
+                </View>
+                }
+         
+          </TouchableOpacity>
+  
+  
+  
+          {/* Bouton Droit */}
+          <TouchableOpacity
+    onPressIn={() => {
+      if (isPilotStarted) {
+        // Mode pilote démarré
+        const newCap = capAsked! + 5;
+        setCapAsked(newCap > 360 ? newCap - 360 : newCap);
+      } else {
+        // Mode manuel
+        myPilot.current!.turnToDirection("tribord",connectedDevice!,relais1Close,
+          relais1Open,
+          relais2Close,
+          relais2Open,)
+      }
+    }}
+    onPressOut={
+      isPilotStarted
+        ? undefined // Pas d'action en mode pilote
+        : () => {
+            // Mode manuel
+            myPilot.current!.stopTurn(connectedDevice!,relais1Close,
+              relais1Open,
+              relais2Close,
+              relais2Open)
+          }
+    }
+  >
+    {isPilotStarted ? (
+      <View className="w-[75px] h-[77px] rounded-lg p-2 m-2 bg-green-700">
+        <Text className="text-5xl text-slate-400 text-center pt-3">+5</Text>
+      </View>
+    ) : (
+      <Icon name="arrow-right-bold-box" size={100} color="green" />
+    )}
+  </TouchableOpacity>
+  
+          </View>
+          
+  
+      </View>
+      )
 }
 
 export default MainPilot
