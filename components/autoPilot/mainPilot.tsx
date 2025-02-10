@@ -7,7 +7,9 @@ import Icons from 'react-native-vector-icons/Ionicons';
 
 import { Device } from 'react-native-ble-plx';
 import ActuatorController from 'ts/pilotActuator';
+import ActuatorControllerTest from 'ts/pilotActuatorExtendRelaisClass';
 import ConfigTiller from './configTiller';
+import RelaisClass from 'ts/relaisClass';
 
 interface MainPilotProps {
   connectedDevice: Device | null;
@@ -18,7 +20,6 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
   // const [openingTimeMaxBabord, setOpeningTimeMaxBabord] = useState<number>(3000);
   // const [openingTimeMaxTribord, setOpeningTimeMaxTribord] = useState<number>(3000);
 
-  
   const {
     relais1Close,
     relais1Open,
@@ -35,7 +36,7 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
 
 // Utiliser useRef pour une instance persistante de ActuatorController
   const controllerRef = useRef(new ActuatorController());
-
+const pilotActuatorTest= useRef(new ActuatorControllerTest());
   const startPilot = () => {
     if (heading !== null) {
       setCapAsked(heading);
@@ -82,6 +83,12 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
       {/* <Text>Sens {sens}</Text> */}
         <Compas onHeadingChange={handleHeadingChange}/>
         <View className='flex flex-row items-center justify-between'>
+
+{/* Pour test RelaisClass */}
+<Pressable
+          onPress={() => pilotActuatorTest.current.stopTurn(connectedDevice)}>
+      <Text>Test classe relais</Text>
+       </Pressable>
 
 {/* Bouton gauche: si PilotStarted on modifiel le CapAsked, sinon on actionne le verrin */}
         <TouchableOpacity  

@@ -91,7 +91,29 @@ function useBLE(): BluetoothLowEnergyApi {
     devices.findIndex((device) => nextDevice.id === device.id) > -1;
 
   const scanForPeripherals = () =>
-    {console.log("début du scan")
+    {
+      console.log("début du scan");
+
+      // Ajout d'un faux périphérique pour test
+  const fakeDevice: Device = {
+    id: "FAKE-DEVICE-123",
+    name: "FakeBLEDevice",
+    connect: async () => fakeDevice, // Simule une connexion immédiate
+    discoverAllServicesAndCharacteristics: async () => fakeDevice, 
+    services: async () => [],
+    isConnected: async () => true,
+  } as Device;
+
+  setTimeout(() => { // pour le fake device
+    setAllDevices((prevState) => {
+      if (!isDuplicteDevice(prevState, fakeDevice)) {
+        console.log("Ajout du faux périphérique au scan.");
+        return [...prevState, fakeDevice];
+      }
+      return prevState;
+    });
+  }, 2000); // Simule un délai avant que l’appareil apparaisse
+
     bleManager.startDeviceScan(null, null, (error, device) => {
         // console.log(" périphériques du scan: " , device)
       if (error) {
@@ -111,6 +133,12 @@ function useBLE(): BluetoothLowEnergyApi {
 
   const connectToDevice = async (device: Device) => {
     try {
+
+      if (device.id === "FAKE-DEVICE-123") { // si connecté au fake
+        console.log("Connexion au faux périphérique réussie !");
+        setConnectedDevice(device);
+        return;
+      }
       const deviceConnection = await bleManager.connectToDevice(device.id);
       setConnectedDevice(deviceConnection);
       await deviceConnection.discoverAllServicesAndCharacteristics();
