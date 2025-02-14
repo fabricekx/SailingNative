@@ -25,11 +25,11 @@ export default class RelaisClass {
       );
       this.relais1State = true;
       console.log(
-        "Commande envoyée pour fermer le relais 1 :", commandeHex,
+        "Commande envoyée pour fermer le RELAIS 1 :", commandeHex,
         "(Base64 :", base64Command, "): relais fermé"
       );
     } catch (error) {
-      console.error("Erreur lors de l'envoi de la commande pour fermer le relais 1 :", error);
+      console.error("Erreur lors de l'envoi de la commande pour fermer le RELAIS 1 :", error);
     }
   }
 
@@ -47,11 +47,11 @@ export default class RelaisClass {
       );
       this.relais1State = false;
       console.log(
-        "Commande envoyée pour ouvrir le relais 1 :", commandeHex,
+        "Commande envoyée pour ouvrir le RELAIS 1 :", commandeHex,
         "(Base64 :", base64Command, "): relais ouvert"
       );
     } catch (error) {
-      console.error("Erreur lors de l'envoi de la commande pour ouvrir le relais 1 :", error);
+      console.error("Erreur lors de l'envoi de la commande pour ouvrir le RELAIS 1 :", error);
     }
   }
 
@@ -69,11 +69,11 @@ export default class RelaisClass {
       );
       this.relais2State = true;
       console.log(
-        "Commande envoyée pour fermer le relais 2 :", commandeHex,
+        "Commande envoyée pour fermer le RELAIS 2 :", commandeHex,
         "(Base64 :", base64Command, "): relais fermé"
       );
     } catch (error) {
-      console.error("Erreur lors de l'envoi de la commande pour fermer le relais 2 :", error);
+      console.error("Erreur lors de l'envoi de la commande pour fermer le RELAIS 2 :", error);
     }
   }
 
@@ -91,11 +91,11 @@ export default class RelaisClass {
       );
       this.relais2State = false;
       console.log(
-        "Commande envoyée pour ouvrir le relais 2 :", commandeHex,
+        "Commande envoyée pour ouvrir le RELAIS 2 :", commandeHex,
         "(Base64 :", base64Command, "): relais ouvert"
       );
     } catch (error) {
-      console.error("Erreur lors de l'envoi de la commande pour ouvrir le relais 2 :", error);
+      console.error("Erreur lors de l'envoi de la commande pour ouvrir le RELAIS 2 :", error);
     }
   }
 
