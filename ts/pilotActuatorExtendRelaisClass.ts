@@ -1,6 +1,5 @@
 import { Device } from "react-native-ble-plx";
 import { appConfig } from 'ts/appConfig';
-import Relais from "./relais";
 import RelaisClass from "./relaisClass";
 
 

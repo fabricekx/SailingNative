@@ -1,12 +1,11 @@
 import { View, Text, TouchableOpacity, Pressable } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import Compas from 'components/navigation/compas';
-import relais from 'ts/relais';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icons from 'react-native-vector-icons/Ionicons';
+import { useRouter } from "expo-router";
 
 import { Device } from 'react-native-ble-plx';
-import ActuatorController from 'ts/pilotActuator';
 import ActuatorControllerTest from 'ts/pilotActuatorExtendRelaisClass';
 import ConfigTiller from './configTiller';
 
@@ -19,28 +18,21 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
   // const [openingTimeMaxBabord, setOpeningTimeMaxBabord] = useState<number>(3000);
   // const [openingTimeMaxTribord, setOpeningTimeMaxTribord] = useState<number>(3000);
 
-  const {
-    relais1Close,
-    relais1Open,
-    relais2Close,
-    relais2Open,
-   
-    
-  } = relais();
 
-  const pilotActuatorTest = useRef<ActuatorControllerTest | null>(null);
+  const myPilot = useRef<ActuatorControllerTest | null>(null);
+
+  const router = useRouter(); // pour navigation vers ConfigTille
+
 
   const [heading, setHeading] = useState<number | null>(null);
   const [capAsked, setCapAsked] = useState<number | null>(null);
   const [isPilotStarted, setIsPilotSarted] = useState<boolean>(false);
   // const [openingTimeMax, setOpeningTimeMax] = useState<number>(3000) // temps d'ouverture maximum des relais depuis la barre au milieu
 
-// Utiliser useRef pour une instance persistante de ActuatorController
-  const controllerRef = useRef(new ActuatorController());
 
   // Création du controller s'il n'existe pas
-  if (pilotActuatorTest.current === null) {
-    pilotActuatorTest.current = new ActuatorControllerTest();
+  if (myPilot.current === null) {
+    myPilot.current = new ActuatorControllerTest();
   }
   const startPilot = () => {
     if (heading !== null) {
@@ -62,7 +54,7 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
 // des valeurs actuelles, on le met dans un useEffect
   useEffect(() => {
     if (isPilotStarted && heading !== null && capAsked !== null) {
-      pilotActuatorTest.current.pilotActuator( // le fait d'utiliser useRef.curent évite qu'une nouvelle instance de pilotActuator ne soit créé à chaque actualisation
+      myPilot.current.pilotActuator( // le fait d'utiliser useRef.curent évite qu'une nouvelle instance de pilotActuator ne soit créé à chaque actualisation
         // ceci n'étant pas un composant React, et comme il fait appel à des hooks (des useState dans les relais),
         capAsked,   // il faut que ces fonctions qui appellent les hook soient passées en argument de la fonction principale.
         heading,
@@ -77,11 +69,10 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
     
     <View className='flex items-center justify-between'>
       <Pressable
-          onPress={() => setIsConfigVisible(!isConfigVisible)}>
+        onPress={() => router.push('/ConfigTillerPage')}>
       <Icons name="settings-outline" size={30} color="gray" /> 
        </Pressable>
-      {isConfigVisible && <ConfigTiller/>}
-      {/* <Text>Sens {sens}</Text> */}
+
         <Compas onHeadingChange={handleHeadingChange}/>
         <View className='flex flex-row items-center justify-between'>
 
@@ -89,8 +80,10 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
 
 {/* Bouton gauche: si PilotStarted on modifiel le CapAsked, sinon on actionne le verrin */}
         <TouchableOpacity  
-              onPressIn={isPilotStarted? () =>{setCapAsked(capAsked-5); capAsked<0 && setCapAsked(capAsked+360)}: () => pilotActuatorTest.current.turnToDirection("babord", connectedDevice)} 
-              onPressOut={isPilotStarted ? undefined : () => pilotActuatorTest.current.stopTurn(connectedDevice)}
+              onPressIn={isPilotStarted? () =>{setCapAsked(capAsked-5); capAsked<0 && setCapAsked(capAsked+360)}: () => myPilot.current.turnToDirection("babord", connectedDevice)} 
+              
+              
+              onPressOut={isPilotStarted ? undefined : () => myPilot.current.stopTurn(connectedDevice)}
 >
   {isPilotStarted? <View className=" w-[75px] h-[77px] rounded-lg p-2 m-2 bg-red-700"><Text className=' text-5xl text-slate-400 text-center pt-3' >-5</Text></View> : <Icon name="arrow-left-bold-box" size={100} color="red" /> }
           </TouchableOpacity>
@@ -118,8 +111,8 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
 
 {/* Bouton de droite */}
         <TouchableOpacity 
-onPressIn={isPilotStarted? () =>{setCapAsked(capAsked+5); capAsked>360 && setCapAsked(capAsked-360)}: () => pilotActuatorTest.current.turnToDirection("tribord", connectedDevice)} 
-onPressOut={isPilotStarted ? undefined : () => pilotActuatorTest.current.stopTurn(connectedDevice)}>
+onPressIn={isPilotStarted? () =>{setCapAsked(capAsked+5); capAsked>360 && setCapAsked(capAsked-360)}: () => myPilot.current.turnToDirection("tribord", connectedDevice)} 
+onPressOut={isPilotStarted ? undefined : () => myPilot.current.stopTurn(connectedDevice)}>
   {isPilotStarted? <View className=" w-[75px] h-[77px] rounded-lg p-2 m-2 bg-green-700"><Text className=' text-5xl text-slate-400 text-center pt-3' >+5</Text></View> :<Icon name="arrow-right-bold-box" size={100} color="green" />     }     </TouchableOpacity>
         </View>
         
