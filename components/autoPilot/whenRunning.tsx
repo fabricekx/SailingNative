@@ -9,18 +9,14 @@ import ActuatorController from 'ts/pilotActuator';
 import ActuatorControllerTest from 'ts/pilotActuatorExtendRelaisClass';
 import ConfigTiller from './configTiller';
 
-interface MainPilotProps {
-  connectedDevice: Device | null;
-}
 
-const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
+
+const whenRuning = () => {
   const [isConfigVisible, setIsConfigVisible] = useState(false); // État pour afficher/masquer la vue contextuelle
-  // const [openingTimeMaxBabord, setOpeningTimeMaxBabord] = useState<number>(3000);
-  // const [openingTimeMaxTribord, setOpeningTimeMaxTribord] = useState<number>(3000);
 
 
 
-  const myPilot = useRef<ActuatorControllerTest | null>(null);
+  const pilotActuatorTest = useRef<ActuatorControllerTest | null>(null);
 
   const [heading, setHeading] = useState<number | null>(null);
   const [capAsked, setCapAsked] = useState<number | null>(null);
@@ -29,8 +25,8 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
 
 
   // Création du controller s'il n'existe pas
-  if (myPilot.current === null) {
-    myPilot.current = new ActuatorControllerTest();
+  if (pilotActuatorTest.current === null) {
+    pilotActuatorTest.current = new ActuatorControllerTest();
   }
   const startPilot = () => {
     if (heading !== null) {
@@ -52,7 +48,7 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
 // des valeurs actuelles, on le met dans un useEffect
   useEffect(() => {
     if (isPilotStarted && heading !== null && capAsked !== null) {
-      myPilot.current.pilotActuator( // le fait d'utiliser useRef.curent évite qu'une nouvelle instance de pilotActuator ne soit créé à chaque actualisation
+      pilotActuatorTest.current.pilotActuator( // le fait d'utiliser useRef.curent évite qu'une nouvelle instance de pilotActuator ne soit créé à chaque actualisation
         // ceci n'étant pas un composant React, et comme il fait appel à des hooks (des useState dans les relais),
         capAsked,   // il faut que ces fonctions qui appellent les hook soient passées en argument de la fonction principale.
         heading,
@@ -79,8 +75,8 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
 
 {/* Bouton gauche: si PilotStarted on modifiel le CapAsked, sinon on actionne le verrin */}
         <TouchableOpacity  
-              onPressIn={isPilotStarted? () =>{setCapAsked(capAsked-5); capAsked<0 && setCapAsked(capAsked+360)}: () => myPilot.current.turnToDirection("babord", connectedDevice)} 
-              onPressOut={isPilotStarted ? undefined : () => myPilot.current.stopTurn(connectedDevice)}
+              onPressIn={isPilotStarted? () =>{setCapAsked(capAsked-5); capAsked<0 && setCapAsked(capAsked+360)}: () => pilotActuatorTest.current.turnToDirection("babord", connectedDevice)} 
+              onPressOut={isPilotStarted ? undefined : () => pilotActuatorTest.current.stopTurn(connectedDevice)}
 >
   {isPilotStarted? <View className=" w-[75px] h-[77px] rounded-lg p-2 m-2 bg-red-700"><Text className=' text-5xl text-slate-400 text-center pt-3' >-5</Text></View> : <Icon name="arrow-left-bold-box" size={100} color="red" /> }
           </TouchableOpacity>
@@ -108,8 +104,8 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
 
 {/* Bouton de droite */}
         <TouchableOpacity 
-onPressIn={isPilotStarted? () =>{setCapAsked(capAsked+5); capAsked>360 && setCapAsked(capAsked-360)}: () => myPilot.current.turnToDirection("tribord", connectedDevice)} 
-onPressOut={isPilotStarted ? undefined : () => myPilot.current.stopTurn(connectedDevice)}>
+onPressIn={isPilotStarted? () =>{setCapAsked(capAsked+5); capAsked>360 && setCapAsked(capAsked-360)}: () => pilotActuatorTest.current.turnToDirection("tribord", connectedDevice)} 
+onPressOut={isPilotStarted ? undefined : () => pilotActuatorTest.current.stopTurn(connectedDevice)}>
   {isPilotStarted? <View className=" w-[75px] h-[77px] rounded-lg p-2 m-2 bg-green-700"><Text className=' text-5xl text-slate-400 text-center pt-3' >+5</Text></View> :<Icon name="arrow-right-bold-box" size={100} color="green" />     }     </TouchableOpacity>
         </View>
         
