@@ -5,10 +5,11 @@ interface ClickButtonProps {
   values: [string, string]; 
   selectedValue: string;
   text?: string;
+  background2?:string //classe de background de tailwind
   onChange ?: (selectedValue: string)=>void
 }
 
-const ClickButton: React.FC<ClickButtonProps> = ({ values,selectedValue, text, onChange }) => {
+const ClickButton: React.FC<ClickButtonProps> = ({ values,selectedValue, text, background2, onChange }) => {
 
   const onPress = () => {
     const newValue = selectedValue === values[0] ? values[1] : values[0];
@@ -18,15 +19,19 @@ const ClickButton: React.FC<ClickButtonProps> = ({ values,selectedValue, text, o
   };
 
   return (
-    <View className=" m-3 flex-row justify-around">
-      <Text className="mb-2 text-xl text-slate-900 dark:text-slate-600">
+    <View className=" mt-1 flex-row justify-center">
+      <Text className="mb-3 text-xl text-slate-900 dark:text-slate-600">
         {text}
       </Text>
       <TouchableOpacity
         onPress={onPress}
-        className= {` px-4 py-2 w-1/4 bg-blue-500 dark:bg-blue-900 rounded-md ` }
+        className= {` px-4 py-2 rounded-lg ${
+    selectedValue === values[1] && background2 
+      ? background2 
+      : "bg-blue-500 dark:bg-blue-900"
+  }`  }
       >
-        <Text className="text-white dark:text-slate-600 text-xl">{selectedValue}</Text>
+        <Text className="  text-white dark:text-slate-600 text-xl ">{selectedValue}</Text>
       </TouchableOpacity>
     </View>
   );

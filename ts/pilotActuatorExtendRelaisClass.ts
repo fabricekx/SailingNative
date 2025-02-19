@@ -32,6 +32,16 @@ private sens:boolean = appConfig.sens;
   this.sens = newSens;
   console.log("Sens mis à jour :", this.sens);
 }
+ // Methode pour mettre à jour les temps de fermeture max
+ public setTimeMaxBabord(newTime:number): void {
+  this.openingTimeMaxBabord= newTime;
+  console.log("Temps babord mise à jour :", this.openingTimeMaxBabord);
+ };
+
+ public setTimeMaxTribord(newTime:number): void {
+  this.openingTimeMaxTribord= newTime;
+  console.log("Temps Tribord mise à jour :", this.openingTimeMaxTribord);
+ };
 
   private countnumberdeviation: number =0
 
