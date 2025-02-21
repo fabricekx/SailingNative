@@ -22,7 +22,7 @@ const AutoPilot = () => {
     connectedDevice,
     disconnectFromDevice,
   } = useBLE();
-  const {relais1Close, relais1Open, relais2Close, relais2Open, relais1State, relais2State} = relais();
+  // const {relais1Close, relais1Open, relais2Close, relais2Open, relais1State, relais2State} = relais();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const scanForDevices = async () => {

@@ -9,30 +9,30 @@ import ActuatorControllerTest from 'ts/pilotActuatorExtendRelaisClass';
 interface WhenRunningProps {
     myPilot: ActuatorControllerTest;
     connectedDevice: Device | null;
+    isPilotStarted: boolean
+    setIsPilotStarted: (value: boolean) => void;  // Fonction qui prend un boolean
   }
   
 
-const WhenRuning : React.FC<WhenRunningProps> = ({myPilot, connectedDevice}) => {
+const WhenRuning : React.FC<WhenRunningProps> = ({myPilot, connectedDevice, isPilotStarted, setIsPilotStarted}) => {
 
 
   const [heading, setHeading] = useState<number | null>(null);
   const [capAsked, setCapAsked] = useState<number | null>(null);
-  const [isPilotStarted, setIsPilotSarted] = useState<boolean>(false);
 
 
-  // Création du controller s'il n'existe pas
   
   const startPilot = () => {
     if (heading !== null) {
       setCapAsked(heading);
-      setIsPilotSarted(true);
+      setIsPilotStarted(true);
     } else {
       console.warn('Impossible de démarrer le pilote : heading est null');
     }
   };
 
   const stopPilot = () => {
-    setIsPilotSarted(false);
+    setIsPilotStarted(false);
   };
 
   const handleHeadingChange = (newHeading: number | null) => {

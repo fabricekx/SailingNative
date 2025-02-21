@@ -119,7 +119,8 @@ function useBLE(): BluetoothLowEnergyApi {
       if (error) {
         console.log(error);
       }
-      if (device && (device.name?.includes("JDY") || device.name?.includes("BLE") )) {
+      
+      if (device && device.name) {
         setAllDevices((prevState: Device[]) => {
           if (!isDuplicteDevice(prevState, device)) {
             return [...prevState, device];
