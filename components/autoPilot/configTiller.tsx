@@ -69,7 +69,7 @@ const ConfigTiller: React.FC<ConfigTillerProps> = ({
               setIsSettingTimeMaxBabordVisible(false);
               setStep("tribord");
               setIsCenterHandleVisible(true);
-              appConfig.openingTimeMaxBabord = timeMaxBabord;
+              appConfig.babordActiveTimeMax = timeMaxBabord;
               appConfig.saveToStorage();
               myPilot.setTimeMaxBabord(timeMaxBabord);
             },
@@ -98,7 +98,7 @@ const ConfigTiller: React.FC<ConfigTillerProps> = ({
             onPress: () => {
               setIsSettingTimeMaxTribordVisible(false);
               setIsConfigEndVisible(true);
-              appConfig.openingTimeMaxTribord = timeMaxTribord;
+              appConfig.tribordActiveTimeMax = timeMaxTribord;
               appConfig.saveToStorage();
               myPilot.setTimeMaxTribord(timeMaxTribord);
               myPilot.turnToDirection("babord", connectedDevice);
@@ -238,7 +238,7 @@ const ConfigTiller: React.FC<ConfigTillerProps> = ({
         </Text>
         <Text>
           Duree actuelle:{" "}
-          {timeMaxBabord ? timeMaxBabord : appConfig.openingTimeMaxBabord}
+          {timeMaxBabord ? timeMaxBabord : appConfig.babordActiveTimeMax}
         </Text>
         <TouchableOpacity
           className="m-5"
@@ -269,7 +269,7 @@ const ConfigTiller: React.FC<ConfigTillerProps> = ({
         </Text>
         <Text className="m-3">
           Duree actuelle:{" "}
-          {timeMaxTribord ? timeMaxTribord : appConfig.openingTimeMaxTribord}
+          {timeMaxTribord ? timeMaxTribord : appConfig.tribordActiveTimeMax}
         </Text>
 
         <View className="flex w-full items-end">

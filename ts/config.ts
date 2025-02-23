@@ -3,8 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class Config {
     public sens: boolean = true;
-    public openingTimeMaxTribord: number = 3000;
-    public openingTimeMaxBabord: number = 3000;
+    public tribordActiveTimeMax: number = 3000;
+    public babordActiveTimeMax: number = 3000;
   
     constructor(initialValues?: Partial<Config>) {
       if (initialValues) {

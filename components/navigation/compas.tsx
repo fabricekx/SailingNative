@@ -98,7 +98,7 @@ const Compas: React.FC<CompasProps> = ({ onHeadingChange }) => {
            // Notifier le parent avec onHeadingChange
            onHeadingChange(roundedAverage);
       }
-    }, 200);
+    }, 500);
 
     // Nettoyage des abonnements et intervalle
     return () => {

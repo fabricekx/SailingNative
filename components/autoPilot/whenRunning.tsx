@@ -31,8 +31,12 @@ const WhenRuning : React.FC<WhenRunningProps> = ({myPilot, connectedDevice, isPi
     }
   };
 
-  const stopPilot = () => {
+  const stopPilot = (connectedDevice : Device) => {
     setIsPilotStarted(false);
+    myPilot.stopTurn(connectedDevice);
+    myPilot.clearIsTurning();
+    myPilot.clearActiveTime();
+    myPilot.clearTimeStamps();
   };
 
   const handleHeadingChange = (newHeading: number | null) => {
@@ -72,7 +76,14 @@ const WhenRuning : React.FC<WhenRunningProps> = ({myPilot, connectedDevice, isPi
 
 
 {/* Boutton start pilot, affiche start ou le cap demandé */}
-        <TouchableOpacity className=" w-40 min-h-32 items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2" onPress={isPilotStarted? stopPilot: startPilot}>
+        <TouchableOpacity className=" w-40 min-h-32 items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2" 
+onPress={() => {
+  if (isPilotStarted) {
+    stopPilot(connectedDevice);
+  } else {
+    startPilot();
+  }
+}}>
        {isPilotStarted? 
        <View className=' flex-1 justify-between items-center'>
         <Text className="text-xl text-blue-800 dark:text-blue-400">

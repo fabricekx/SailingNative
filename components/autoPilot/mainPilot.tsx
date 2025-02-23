@@ -30,26 +30,28 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
   if (myPilot.current === null) {
     myPilot.current = new ActuatorControllerTest();
   }
- const handleConfig = ()=> { 
-  Alert.alert(
-          "Confirmation",
-          "Voulez vous procéder au calibrage du Pilot? ",
-          [
-            {
-              text: "Non",
-              style: "cancel",
-              onPress: () => {setModalVisible(!modalVisible)
-               ;
-              },
-            },
-            {
-              text: "Oui",
-              onPress: () => {setModalVisible(!modalVisible); setIsConfigVisible(!isConfigVisible)
-                
-              },
-            },
-          ]
-        ); }
+  const handleConfig = () => {
+    Alert.alert(
+      "Confirmation",
+      "Voulez vous procéder au calibrage du Pilot? ",
+      [
+        {
+          text: "Non",
+          style: "cancel",
+          onPress: () => {
+            setModalVisible(!modalVisible);
+          },
+        },
+        {
+          text: "Oui",
+          onPress: () => {
+            setModalVisible(!modalVisible);
+            setIsConfigVisible(!isConfigVisible);
+          },
+        },
+      ]
+    );
+  };
   return (
     <View className="flex items-center justify-between w-full">
       <Modal
@@ -63,32 +65,40 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
       >
         <View className="flex-1 justify-center items-center ">
           <View className="m-3 p-2 bg-slate-500 rounded-lg">
-            <Text className="m-3 text-center text-blue-800 dark:text-blue-400 text-3xl">Configuration</Text>
-            <Text className="m-3  text-blue-800 dark:text-blue-400 text-xl"> Parametres actuels</Text>
+            <Text className="m-3 text-center text-blue-800 dark:text-blue-400 text-3xl">
+              Configuration
+            </Text>
+            <Text className="m-3  text-blue-800 dark:text-blue-400 text-xl">
+              {" "}
+              Parametres actuels
+            </Text>
             <View className="m-3 p-3">
-            <Text> Sens d'installation: {appConfig.sens ? "Normal" : "Inverse"}</Text>
-            <Text> Butée Babord : {appConfig.openingTimeMaxBabord}</Text>
-            <Text> Butée Tribord : {appConfig.openingTimeMaxTribord}</Text>
+              <Text>
+                {" "}
+                Sens d'installation: {appConfig.sens ? "Normal" : "Inverse"}
+              </Text>
+              <Text> Butée Babord : {appConfig.babordActiveTimeMax}</Text>
+              <Text> Butée Tribord : {appConfig.tribordActiveTimeMax}</Text>
             </View>
             <View className="flex-row justify-between">
-            <TouchableOpacity
-              onPress={() => setModalVisible(!modalVisible)}
-              className="w-1/3 
+              <TouchableOpacity
+                onPress={() => setModalVisible(!modalVisible)}
+                className="w-1/3 
               m-3 rounded-lg  bg-blue-500 dark:bg-blue-900"
-            >
-              <Text className="text-center m-1  text-white dark:text-slate-600  ">
-                Fermer
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleConfig}
-              className="w-1/3 
+              >
+                <Text className="text-center m-1  text-white dark:text-slate-600  ">
+                  Fermer
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleConfig}
+                className="w-1/3 
               m-3 rounded-lg  bg-red-500 dark:bg-red-900"
-            >
-              <Text className="text-center m-1  text-white dark:text-slate-600  ">
-                Configurer
-              </Text>
-            </TouchableOpacity>
+              >
+                <Text className="text-center m-1  text-white dark:text-slate-600  ">
+                  Configurer
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -115,8 +125,8 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
         <WhenRuning
           myPilot={myPilot.current}
           connectedDevice={connectedDevice}
-          isPilotStarted={isPilotStarted} 
-          setIsPilotStarted={setIsPilotStarted} 
+          isPilotStarted={isPilotStarted}
+          setIsPilotStarted={setIsPilotStarted}
         />
       )}
     </View>
