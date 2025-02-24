@@ -21,6 +21,7 @@ export default function TabsLayout() {
   const colorScheme = useColorScheme();
 
   return (
+    
     <Tabs
     screenOptions={{
       tabBarShowLabel: false,

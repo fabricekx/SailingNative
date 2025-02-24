@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@expo/metro-config": "^0.19.5",
+    "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-community/slider": "4.5.5",
     "@react-native-picker/picker": "2.9.0",
     "@shopify/react-native-skia": "1.5.0",
     "date-fns": "^4.1.0",
@@ -37,6 +39,7 @@
     "react-native-chart-kit": "^6.12.0",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-maps": "1.18.0",
+    "react-native-orientation-manager": "^1.1.2",
     "react-native-pager-view": "6.5.1",
     "react-native-paper": "^5.12.5",
     "react-native-reanimated": "~3.16.1",
@@ -45,8 +48,7 @@
     "react-native-svg": "15.8.0",
     "react-native-web": "~0.18.11",
     "tailwindcss": "^3.4.0",
-    "victory-native": "^41.9.0",
-    "@react-native-async-storage/async-storage": "1.23.1"
+    "victory-native": "^41.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

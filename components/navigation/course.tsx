@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Text, View, TouchableOpacity } from "react-native";
 import * as Location from "expo-location";
+import { CapContext } from "@/app/capContext";
 
-interface CapEtVitesseProps {
+interface CourseProps {
   unit: string;
 }
 
-const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
+const Course: React.FC<CourseProps> = ({ unit }) => {
   const [currentSpeed, setCurrentSpeed] = useState(0); // Vitesse actuelle en km/h
-  const [course, setCourse] = useState<number | null>(null); // Cap actuel en degrés
+  const { course, setCourse } = useContext(CapContext); // utilisation du context et pas du useState
   const [maxSpeed, setMaxSpeed] = useState(0); // Vitesse maximale
   const [distance, setDistance] = useState(0); // Distance parcourue en km
   const [tracking, setTracking] = useState(false); // Indique si le tracking est actif
@@ -75,14 +76,14 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
       locationSubscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
-          timeInterval: 3000, // Mise à jour toutes les 3 secondes
-          distanceInterval: 10, // Mise à jour après 10 mètres
+          timeInterval: 1000, // Mise à jour toutes les 3 secondes
+          distanceInterval: 1, // Mise à jour après 10 mètres
         },
         (location) => {
           const { speed, heading, latitude, longitude, accuracy } =
             location.coords;
 
-          if (accuracy > 20 || !accuracy) return; // si la précision du GPS est mauvaise, on sort
+          if (accuracy > 10 || !accuracy) return; // si la précision du GPS est mauvaise, on sort
           // Mise à jour de la précision
           setAccuracy(accuracy);
           // Toujours mettre à jour la vitesse actuelle et le cap
@@ -162,7 +163,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
     <View className="flex-row flex-wrap justify-between">
       {/* Vitesse actuelle */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-800 dark:text-blue-400">Vitesse (SOG) :</Text>
+        <Text className="text-xl text-blue-800 dark:text-blue-400">
+          Vitesse (SOG) :
+        </Text>
         <Text className="text-5xl text-black dark:text-slate-400">
           {currentSpeed > 0
             ? unit === "Noeuds"
@@ -174,7 +177,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
 
       {/* Cap actuel */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-800 dark:text-blue-400">Cap suivi (COG) :</Text>
+        <Text className="text-xl text-blue-800 dark:text-blue-400">
+          Cap suivi (COG) :
+        </Text>
         <Text className="text-5xl text-black dark:text-slate-400">
           {currentSpeed >= 3 && course !== null
             ? `${course.toFixed(0)}°`
@@ -184,7 +189,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
 
       {/* Vitesse max */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-800 dark:text-blue-400">Vitesse Max :</Text>
+        <Text className="text-xl text-blue-800 dark:text-blue-400">
+          Vitesse Max :
+        </Text>
         <Text className="text-5xl text-black dark:text-slate-400">
           {tracking
             ? unit === "Noeuds"
@@ -196,7 +203,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
 
       {/* Vitesse moyenne */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-800 dark:text-blue-400">Vitesse Moy. :</Text>
+        <Text className="text-xl text-blue-800 dark:text-blue-400">
+          Vitesse Moy. :
+        </Text>
         <Text className="text-5xl text-black dark:text-slate-400">
           {tracking
             ? unit === "Noeuds"
@@ -222,7 +231,9 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
 
       {/* Durée */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-800 dark:text-blue-400">Durée :</Text>
+        <Text className="text-xl text-blue-800 dark:text-blue-400">
+          Durée :
+        </Text>
         <Text className="text-3xl text-black dark:text-slate-400">
           {formatDuration(trackingDuration)}
         </Text>
@@ -247,10 +258,12 @@ const CapEtVitesse: React.FC<CapEtVitesseProps> = ({ unit }) => {
         >
           <Text className="text-white text-lg">Reset</Text>
         </TouchableOpacity>
-        <Text className="text-white">Précision :{accuracy && accuracy.toFixed(1)}</Text>
       </View>
+      <Text className="text-white">
+        Précision :{accuracy && accuracy.toFixed(1)}
+      </Text>
     </View>
   );
 };
 
-export default CapEtVitesse;
+export default Course;

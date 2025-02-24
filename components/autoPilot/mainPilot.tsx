@@ -129,6 +129,8 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
           setIsPilotStarted={setIsPilotStarted}
         />
       )}
+
+     
     </View>
   );
 };
