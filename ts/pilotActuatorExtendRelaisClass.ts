@@ -48,13 +48,12 @@ export default class ActuatorController extends RelaisClass {
   private checkActiveTime() {
     if (this.tribordActiveTime > this.tribordActiveTimeMax) {
       this.tribordActiveTime = this.tribordActiveTimeMax;
-      console.log("le temps d'activation tribord a été setté au maximum")
+      console.log("le temps d'activation tribord a été setté au maximum");
     }
     if (this.babordActiveTime > this.babordActiveTimeMax) {
       this.babordActiveTime = this.babordActiveTimeMax;
-      console.log("le temps d'activation babord a été setté au maximum")
-
-    };
+      console.log("le temps d'activation babord a été setté au maximum");
+    }
     if (this.countnumberdeviation > 2) {
       // si ça fait 3 fois que le bateau dérive à babord
       // on va modifier le centre en diminuant le temps du tribordActiveTime
@@ -64,7 +63,7 @@ export default class ActuatorController extends RelaisClass {
       const adjustTime = this.tribordActiveTimeMax / 10;
       this.tribordActiveTimeMax -= adjustTime;
       this.babordActiveTimeMax += adjustTime;
-    };
+    }
     if (this.countnumberdeviation < -2) {
       // si ça fait 3 fois que le bateau dérive à tribord
       // on va modifier le centre en diminuant le temps du tribordActiveTime
@@ -79,23 +78,34 @@ export default class ActuatorController extends RelaisClass {
 
   // Fonctions pour remettre à zéro ou à null les valeurs (quand le cap est bon et quand on stop le pilot)
   public clearActiveTime = () => {
-    if(this.babordActiveTime!=0) { this.babordActiveTime=0};
-    if(this.tribordActiveTime!=0) { this.tribordActiveTime=0};
-    console.log(" les temps d'action ont été remis à 0")
-   };
+    if (this.babordActiveTime != 0) {
+      this.babordActiveTime = 0;
+    }
+    if (this.tribordActiveTime != 0) {
+      this.tribordActiveTime = 0;
+    }
+    console.log(" les temps d'action ont été remis à 0");
+  };
 
-   public clearTimeStamps = () => {
-    if (this.tribordCloseTimestamp) { this.tribordCloseTimestamp= null};
-    if (this.babordCloseTimestamp) { this.babordCloseTimestamp= null};
-    console.log("le TimeStamp a été mis à null")
-   }
+  public clearTimeStamps = () => {
+    if (this.tribordCloseTimestamp) {
+      this.tribordCloseTimestamp = null;
+    }
+    if (this.babordCloseTimestamp) {
+      this.babordCloseTimestamp = null;
+    }
+    console.log("le TimeStamp a été mis à null");
+  };
 
-   public clearIsTurning = () => {
-    if (this.isTurningBabord) {this.isTurningBabord=false};
-    if (this.isTurningTribord) {this.isTurningTribord=false}
-    console.log("isTurning a été mis à false")
-
-   }
+  public clearIsTurning = () => {
+    if (this.isTurningBabord) {
+      this.isTurningBabord = false;
+    }
+    if (this.isTurningTribord) {
+      this.isTurningTribord = false;
+    }
+    console.log("isTurning a été mis à false");
+  };
   // Fonction pour tourner en fonction du sens venu de config
   async turnToDirection(direction: "babord" | "tribord", device: Device) {
     if (!device) {
@@ -132,13 +142,18 @@ export default class ActuatorController extends RelaisClass {
       if (this.babordCloseTimestamp != null) {
         this.babordActiveTime += Date.now() - this.babordCloseTimestamp; // On ajoute le temps de fermeture
         this.babordCloseTimestamp = null; // on réinitialise le debut de fermeture
-        console.log("Le temps d'activité babord a été mis à jours dans StopTurn", this.babordActiveTime )
+        console.log(
+          "Le temps d'activité babord a été mis à jours dans StopTurn",
+          this.babordActiveTime
+        );
       }
       if (this.tribordCloseTimestamp != null) {
         this.tribordActiveTime += Date.now() - this.tribordCloseTimestamp; // On ajoute le temps de fermeture
         this.tribordCloseTimestamp = null; // on réinitialise le debut de fermeture
-        console.log("Le temps d'activité tribord a été mis à jours dans StopTurn", this.tribordActiveTime )
-
+        console.log(
+          "Le temps d'activité tribord a été mis à jours dans StopTurn",
+          this.tribordActiveTime
+        );
       }
     } catch (error) {
       console.error("Erreur lors de l'arrêt des relais :", error);
@@ -188,70 +203,69 @@ export default class ActuatorController extends RelaisClass {
   private async handleDriftToTribord(deviation: number, device: Device) {
     // si dérive à tribord, on vire à babord
     this.updateLastDeviation(deviation);
-    console.log(
-      "Deviation: ", deviation
-     
-    );
+    console.log("Deviation: ", deviation);
     // CAS 1 : le verrin est inactif et le cap ne s'améliore pas, on active le verrin pour tourner vers babord
     if (!this.isActuatorRunning && !this.isDeviationBetter()) {
       await this.turnToDirection("babord", device);
       this.babordCloseTimestamp = Date.now(); // on enregistre le temps de début de fermeture
       this.isTurningBabord = true;
       this.isBarreCentered = false;
-      console.log("Cas 1 dérive Tribord, timeStamp enregistré")
+      console.log("Cas 1 dérive Tribord, timeStamp enregistré");
     }
     // CAS 2 : le verrin est déjà actif
     if (this.isActuatorRunning && this.isDeviationBetter()) {
       await this.stopTurn(device); // on arrete le verrin, le temps de fonctionnement du verrin est calculé dans la fonction stopTurn
-   console.log("Cas 2 dérive tribord, stopTurn")
+      console.log("Cas 2 dérive tribord, stopTurn");
     }
   }
 
   private async handleDriftToBabord(deviation: number, device: Device) {
     // si dérive à Babord, on vire à tribord
     this.updateLastDeviation(deviation);
-    console.log(
-      "Deviation: ", deviation
-    );
+    console.log("Deviation: ", deviation);
     // CAS 1 : le verrin est inactif et le cap ne s'améliore pas, on active le verrin pour tourner vers tribord
     if (!this.isActuatorRunning && !this.isDeviationBetter()) {
       await this.turnToDirection("tribord", device);
       this.tribordCloseTimestamp = Date.now(); // on enregistre le temps de début de fermeture
       this.isTurningTribord = true;
       this.isBarreCentered = false;
-      console.log("Cas1 dérive babord, TimeStamp enregistré")
+      console.log("Cas1 dérive babord, TimeStamp enregistré");
     }
     // CAS 2 : le verrin est déjà actif
     if (this.isActuatorRunning && this.isDeviationBetter()) {
       await this.stopTurn(device); // on arrete le verrin
-      console.log(" cas 2 babord, stopTurn")
+      console.log(" cas 2 babord, stopTurn");
     }
   }
 
   // Permet de tourner pendant un temps donner de manière séquentielle
-  private async handleTurn(direction: "babord" | "tribord", device: Device, activeTime: number) {
-  if (this.isTurning) {
-    // Si une rotation est déjà en cours, on ignore l'appel
-    // La méthode pilotActuator est appellée grace à un useEffect dans WhenRunning
-    // Elle est appelée à chaque modification du heading (paramétrable)
-    // Si elle est appelée alors que l'appel précédent n'a pas fini le handle turn, risque de problème 
-    return;
+  private async handleTurn(
+    direction: "babord" | "tribord",
+    device: Device,
+    activeTime: number
+  ) {
+    if (this.isTurning) {
+      // Si une rotation est déjà en cours, on ignore l'appel
+      // La méthode pilotActuator est appellée grace à un useEffect dans WhenRunning
+      // Elle est appelée à chaque modification du heading (paramétrable)
+      // Si elle est appelée alors que l'appel précédent n'a pas fini le handle turn, risque de problème
+      return;
+    }
+    this.isTurning = true;
+    try {
+      await this.turnToDirection(direction, device);
+      await new Promise((resolve) => setTimeout(resolve, activeTime));
+      await this.stopTurn(device);
+      this.isBarreCentered = true;
+      this.clearActiveTime();
+      this.clearTimeStamps();
+      this.clearIsTurning();
+      this.countnumberdeviation += direction === "babord" ? -1 : 1;
+      this.lastDeviations = [0, 0];
+    } finally {
+      this.isTurning = false;
+    }
   }
-  this.isTurning = true;
-  try {
-    await this.turnToDirection(direction, device);
-    await new Promise(resolve => setTimeout(resolve, activeTime));
-    await this.stopTurn(device);
-    this.isBarreCentered = true;
-    this.clearActiveTime();
-    this.clearTimeStamps();
-    this.clearIsTurning();
-    this.countnumberdeviation += (direction === "babord") ? -1 : 1;
-    this.lastDeviations = [0, 0];
-  } finally {
-    this.isTurning = false;
-  }
-}
 
   private async handleCapOK(device: Device) {
     // il pourrait arriver que le cap soit bon alors que le verrin est en marche
@@ -259,9 +273,9 @@ export default class ActuatorController extends RelaisClass {
     console.log("Le cap est bon");
     {
       if (this.isActuatorRunning) {
-        console.log("cas particulier cap bon")
+        console.log("cas particulier cap bon");
 
-       await this.stopTurn(device); // ce qui calcule en meme temps les activeTime
+        await this.stopTurn(device); // ce qui calcule en meme temps les activeTime
       }
 
       // on vérifie que les temps de fermeture ne sont pas supérieurs aux temps max
@@ -270,19 +284,12 @@ export default class ActuatorController extends RelaisClass {
 
       if (this.isTurningTribord) {
         await this.handleTurn("babord", device, this.tribordActiveTime);
-        
-         
       }
       if (this.isTurningBabord) {
         await this.handleTurn("tribord", device, this.babordActiveTime);
-
       }
     }
   }
-
- 
-
-  
 
   /**
    * Gère automatiquement les relais en fonction du heading et du cap demandé
@@ -297,30 +304,31 @@ export default class ActuatorController extends RelaisClass {
     const deviation = Math.round(this.calculateDeviation(capAsked, heading)); // number, différence en degrés,comprose entre -180 (déviation à tribord)
     //  et +180 (déviation à babord)
 
-    /* 
+  //  J'enferme tout dans une condition: si la barre est entrain de revenir au centre, on ne fait rien
+    if (!this.isTurning) {
+       /* 
     Si déviation vers BABORD
     */
+      //  activation du verrin, si Deviation est positif et suppérieur à tolérence, j'ai dérivé vers babord
+      if (deviation > tolerance) {
+        await this.handleDriftToBabord(deviation, device);
+      }
 
-    //  activation du verrin, si Deviation est positif et suppérieur à tolérence, j'ai dérivé vers babord
-    if (deviation > tolerance) {
-      await this.handleDriftToBabord(deviation, device);
-    }
-
-    /* 
+      /* 
     Si déviation vers Tribord
     */
-    if (deviation < -tolerance) {
-      // Différence négative : dérive à tribord. J'appelle le fonction
-      await this.handleDriftToTribord(deviation, device);
-    }
+      if (deviation < -tolerance) {
+        // Différence négative : dérive à tribord. J'appelle le fonction
+        await this.handleDriftToTribord(deviation, device);
+      }
 
-    /* 
+      /* 
     Si le cap est bon et que la barre n'est pas centrée
     */
-    if (Math.abs(deviation) < tolerance && !this.isBarreCentered) {
-      // si le cap est bon
-      this.handleCapOK(device)
+      if (Math.abs(deviation) < tolerance && !this.isBarreCentered) {
+        // si le cap est bon
+        this.handleCapOK(device);
+      }
+    }
   }
-}
-
 }

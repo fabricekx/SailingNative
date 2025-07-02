@@ -8,11 +8,44 @@ interface SensorData {
   x: number;
   y: number;
   z: number;
+  timestamp?: number; // va permettre de vérifier que les données sont simultanées
 }
 
 const Compas1 = () => {
   const { heading, setHeading } = useContext(CapContext);
-  const valuesRef = useRef<number[]>([]); // Stocke les valeurs sans re-rendu
+  const valuesRef = useRef<number[]>([]);
+  const [sensorData, setSensorData] = useState<{
+    magneto: SensorData;
+    accel: SensorData;
+  } | null>(null);
+
+  useEffect(() => {
+    let lastMagneto: SensorData | null = null;
+    let lastAccel: SensorData | null = null;
+
+    const tryUpdate = () => {
+      if (lastMagneto && lastAccel) {
+        setSensorData({ magneto: lastMagneto, accel: lastAccel });
+        lastMagneto = null;
+        lastAccel = null;
+      }
+    };
+
+    const magnetometerSubscription = Magnetometer.addListener((data) => {
+      lastMagneto = data;
+      tryUpdate();
+    });
+
+    const accelerometerSubscription = Accelerometer.addListener((data) => {
+      lastAccel = data;
+      tryUpdate();
+    });
+
+    return () => {
+      magnetometerSubscription.remove();
+      accelerometerSubscription.remove();
+    };
+  }, []);
 
   // Fonction pour calculer le cap corrigé
   const calculateHeading = (
@@ -38,11 +71,11 @@ const Compas1 = () => {
     const Yh = my * cosRoll - mz * sinRoll;
 
     // Étape 3 : Calcul de l'angle du cap magnétique
-    const headingRad = Math.atan2(Yh, Xh);
-    let headingDeg = (headingRad * 180) / Math.PI; // Conversion en degrés
 
     // Normaliser l'angle dans la plage [0, 360) j'enleve 90 pour l'orientation en paysage et j'ajoute 2.6 pour la déclinaisons
+    let headingDeg = (Math.atan2(Yh, Xh) * 180) / Math.PI;
     headingDeg = (headingDeg + 360 - 90 + 2.6) % 360;
+
     return headingDeg;
   };
 
@@ -65,49 +98,17 @@ const Compas1 = () => {
   };
 
   useEffect(() => {
-    let magnetometerData: SensorData = { x: 0, y: 0, z: 0 };
-    let accelerometerData: SensorData = { x: 0, y: 0, z: 0 };
+    if (!sensorData) return;
 
-    // Abonnement au magnétomètre
-    const magnetometerSubscription = Magnetometer.addListener((data) => {
-      magnetometerData = data;
-    });
+    const heading = calculateHeading(sensorData.magneto, sensorData.accel);
+    if (heading !== null) {
+      valuesRef.current.push(heading);
+      if (valuesRef.current.length > 5) valuesRef.current.shift();
 
-    // Abonnement à l'accéléromètre
-    const accelerometerSubscription = Accelerometer.addListener((data) => {
-      accelerometerData = data;
-    });
-
-    // Interval pour calculer la moyenne toutes les secondes
-    const interval = setInterval(() => {
-      const correctedHeading = calculateHeading(
-        magnetometerData,
-        accelerometerData
-      );
-
-      if (correctedHeading !== null) {
-        valuesRef.current.push(correctedHeading);
-
-        if (valuesRef.current.length > 4) {
-          valuesRef.current.shift(); // Garde uniquement les 5 dernières valeurs
-        }
-
-        const average = calculateMeanHeading(valuesRef.current);
-
-        let roundedAverage = parseFloat(average.toFixed(1));
-        // normalisation:
-        roundedAverage = (roundedAverage + 360) % 360;
-        setHeading(roundedAverage);
-      }
-    }, 500);
-
-    // Nettoyage des abonnements et intervalle
-    return () => {
-      magnetometerSubscription.remove();
-      accelerometerSubscription.remove();
-      clearInterval(interval);
-    };
-  }, []);
+      const avg = calculateMeanHeading(valuesRef.current);
+      setHeading(parseFloat(avg.toFixed(1)));
+    }
+  }, [sensorData]);
 
   // Transmet le cap moyen via la props onHeadingChange
 

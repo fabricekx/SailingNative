@@ -26,6 +26,7 @@
     "expo-splash-screen": "~0.29.11",
     "expo-status-bar": "~2.0.0",
     "expo-system-ui": "~4.0.5",
+    "geolib": "^3.3.4",
     "metro": "^0.81.0",
     "metro-config": "^0.81.0",
     "metro-core": "^0.81.0",

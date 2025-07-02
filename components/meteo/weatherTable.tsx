@@ -1,4 +1,3 @@
-import SelectList from "components/usefull/selectList";
 import React, { useState } from "react";
 import { View, Text } from "react-native";
 import { DataTable } from "react-native-paper";
@@ -24,23 +23,23 @@ const formattedDate = time => {
     : format(parsedTime, "HH:mm");
 };
 
-const beaufortColor = (speed) => {
-  if (speed < 1) return ''; // 0 Beaufort
-  else if (speed < 3) return '#4CD8E4'; // 1 Beaufort
-  else if (speed < 6) return '#74FA59'; // 2 Beaufort
-  else if (speed < 10) return '#65B626'; // 3 Beaufort
-  else if (speed < 16) return '#ffd700'; // 4 Beaufort
-  else if (speed < 21) return '#ff8c00'; // 5 Beaufort
-  else if (speed < 27) return '#FB3535'; // 6 Beaufort
-  else if (speed < 33) return '#B7273F'; // 7 Beaufort (double-check color)
-  else if (speed < 40) return '#8C27B7'; // 8 Beaufort
-  else if (speed < 47) return '#3827B7'; // 9 Beaufort
-  else if (speed < 55) return '#02010D'; // 10 Beaufort
-  else if (speed < 63) return '#FB3535'; // 11 Beaufort
-  else return '#fcf156'; // 12 Beaufort or higher
+const beaufortColor = (speed: number) => { // ajout de FF pour forcer l'opacité
+  if (speed < 1) return '#FFFFFF'; // 0 Beaufort
+  else if (speed < 3) return '#4CD8E4FF'; // 1 Beaufort
+  else if (speed < 6) return '#74FA59FF'; // 2 Beaufort
+  else if (speed < 10) return '#65B626FF'; // 3 Beaufort
+  else if (speed < 16) return '#FFD700FF'; // 4 Beaufort
+  else if (speed < 21) return '#FF8C00FF'; // 5 Beaufort
+  else if (speed < 27) return '#FB3535FF'; // 6 Beaufort
+  else if (speed < 33) return '#B7273FFF'; // 7 Beaufort
+  else if (speed < 40) return '#8C27B7FF'; // 8 Beaufort
+  else if (speed < 47) return '#3827B7FF'; // 9 Beaufort
+  else if (speed < 55) return '#02010DFF'; // 10 Beaufort
+  else if (speed < 63) return '#FB3535FF'; // 11 Beaufort
+  else return '#FCF156FF'; // 12 Beaufort ou plus
 };
 
-const rainColor = (rain) => {
+const rainColor = (rain: number) => {
   if (rain ==0) { return ''}
   else if (rain<3) {return '#8ee8e5'} // pluie faible
   else if (rain<7) {return '#f5771d'} // pluie modérée

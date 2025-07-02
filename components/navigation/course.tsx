@@ -2,14 +2,14 @@ import React, { useState, useEffect, useContext } from "react";
 import { Text, View, TouchableOpacity } from "react-native";
 import * as Location from "expo-location";
 import { CapContext } from "@/app/capContext";
+import { getDistance } from 'geolib';
 
 interface CourseProps {
   unit: string;
 }
 
 const Course: React.FC<CourseProps> = ({ unit }) => {
-  const [currentSpeed, setCurrentSpeed] = useState(0); // Vitesse actuelle en km/h
-  const { course, setCourse } = useContext(CapContext); // utilisation du context et pas du useState
+  const { course, setCourse,currentSpeed, setCurrentSpeed } = useContext(CapContext); // utilisation du context et pas du useState
   const [maxSpeed, setMaxSpeed] = useState(0); // Vitesse maximale
   const [distance, setDistance] = useState(0); // Distance parcourue en km
   const [tracking, setTracking] = useState(false); // Indique si le tracking est actif
@@ -40,27 +40,7 @@ const Course: React.FC<CourseProps> = ({ unit }) => {
     setSpeedValues([]);
   };
 
-  // Fonction utilitaire : Calcul de la distance entre deux coordonnées GPS (formule de Haversine)
-  const haversine = (
-    coord1: { latitude: number; longitude: number },
-    coord2: { latitude: number; longitude: number }
-  ) => {
-    const R = 6371; // Rayon de la Terre en km
-    const toRad = (value: number) => (value * Math.PI) / 180;
-
-    const dLat = toRad(coord2.latitude - coord1.latitude);
-    const dLon = toRad(coord2.longitude - coord1.longitude);
-
-    const lat1 = toRad(coord1.latitude);
-    const lat2 = toRad(coord2.latitude);
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c; // Distance en km
-  };
+ 
 
   // Gestion de la localisation
   useEffect(() => {
@@ -75,8 +55,8 @@ const Course: React.FC<CourseProps> = ({ unit }) => {
 
       locationSubscription = await Location.watchPositionAsync(
         {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 1000, // Mise à jour toutes les 3 secondes
+          accuracy: Location.Accuracy.BestForNavigation,
+          timeInterval: 1000, // Mise à jour toutes les secondes
           distanceInterval: 1, // Mise à jour après 10 mètres
         },
         (location) => {
@@ -94,14 +74,11 @@ const Course: React.FC<CourseProps> = ({ unit }) => {
           if (tracking) {
             // Calcul de la distance parcourue
             if (prevLocation) {
-              const distanceIncrement = haversine(
-                {
-                  latitude: prevLocation.latitude,
-                  longitude: prevLocation.longitude,
-                },
+              const distanceIncrement = getDistance(
+                { latitude: prevLocation.latitude, longitude: prevLocation.longitude },
                 { latitude, longitude }
-              );
-
+              ) / 1000; // Conversion en kilomètres
+            
               if (distanceIncrement > 0.01) {
                 setDistance((prevDistance) => prevDistance + distanceIncrement);
               }
@@ -181,7 +158,7 @@ const Course: React.FC<CourseProps> = ({ unit }) => {
           Cap suivi (COG) :
         </Text>
         <Text className="text-5xl text-black dark:text-slate-400">
-          {currentSpeed >= 3 && course !== null
+          {currentSpeed >= 2 && course !== null // on n'affiche pas de cap si la vitesse est inférieure à 2 km/h
             ? `${course.toFixed(0)}°`
             : "..."}
         </Text>

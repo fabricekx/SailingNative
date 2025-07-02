@@ -1,15 +1,15 @@
 import { View, Text, TouchableOpacity, Pressable } from "react-native";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import Compas from "components/navigation/compas";
+import Compas1 from "components/navigation/compas1";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Slider from "@react-native-community/slider";
 
 import { Device } from "react-native-ble-plx";
-import ActuatorControllerTest from "ts/pilotActuatorExtendRelaisClass";
+import ActuatorController from "ts/pilotActuatorExtendRelaisClass";
 import { CapContext } from "@/app/capContext";
 
 interface WhenRunningProps {
-  myPilot: ActuatorControllerTest;
+  myPilot: ActuatorController;
   connectedDevice: Device | null;
   isPilotStarted: boolean;
   setIsPilotStarted: (value: boolean) => void; // Fonction qui prend un boolean
@@ -27,15 +27,19 @@ const WhenRuning: React.FC<WhenRunningProps> = ({
     throw new Error("MainPilot must be used within a CapProvider");
   }
 
-  // const [heading, setHeading] = useState<number | null>(null);
-  const { heading, setHeading, course, setCourse } = capContext; // valeurs provenant du context
+  const { heading, setHeading, course, setCourse, currentSpeed, setCurrentSpeed } = capContext; // valeurs provenant du context
 
   const [capAsked, setCapAsked] = useState<number | null>(null);
   const [tolerance, setTolerance] = useState<number>(10);
 
+ const capToUse =
+  course !== null && currentSpeed !== null && currentSpeed > 2
+    ? course
+    : heading;
+
   const startPilot = () => {
-    if (heading !== null) {
-      setCapAsked(heading);
+    if (capToUse !== null) {
+      setCapAsked(capToUse);
       setIsPilotStarted(true);
     } else {
       console.warn("Impossible de démarrer le pilote : heading est null");
@@ -53,22 +57,23 @@ const WhenRuning: React.FC<WhenRunningProps> = ({
   //  pour s'assurer que le pilotActuator soit appelé si il y a un changement de cap, d'activation etc et qu'il utilise
   // des valeurs actuelles, on le met dans un useEffect
   useEffect(() => {
-    if (isPilotStarted && heading !== null && capAsked !== null) {
+    if (isPilotStarted && capToUse !== null && capAsked !== null) {
       myPilot.pilotActuator(
         capAsked, // il faut que ces fonctions qui appellent les hook soient passées en argument de la fonction principale.
-        heading,
+        capToUse,
         tolerance,
 
         connectedDevice
       );
     }
-  }, [isPilotStarted, heading, capAsked]);
+  }, [isPilotStarted, capToUse, capAsked]);
 
   return (
     <View className="flex items-center justify-between">
-      <Compas />
+      <Compas1 />
+      <Text>Cap GPS: {course}</Text>
       <View className="flex flex-row items-center justify-between">
-        {/* Bouton gauche: si PilotStarted on modifiel le CapAsked, sinon on actionne le verrin */}
+        {/* Bouton gauche: si PilotStarted on modifie le CapAsked, sinon on actionne le verrin */}
         <TouchableOpacity
           onPressIn={
             isPilotStarted
