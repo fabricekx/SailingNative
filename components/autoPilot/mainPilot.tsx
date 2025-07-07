@@ -11,7 +11,7 @@ import Icons from "react-native-vector-icons/Ionicons";
 import { appConfig } from "ts/appConfig";
 
 import { Device } from "react-native-ble-plx";
-import ActuatorControllerTest from "ts/pilotActuatorExtendRelaisClass";
+import ActuatorController from "ts/pilotActuatorExtendRelaisClass";
 import ConfigTiller from "./configTiller";
 import WhenRuning from "./whenRunning";
 import { CapContext } from "@/app/capContext";
@@ -25,12 +25,12 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
   const [modalVisible, setModalVisible] = useState(false); // pour afficher la config
   const { course, setCourse } = useContext(CapContext); // utilisation du context et pas du useState
 
-  const myPilot = useRef<ActuatorControllerTest | null>(null);
+  const myPilot = useRef<ActuatorController | null>(null);
   const [isPilotStarted, setIsPilotStarted] = useState(false); // à passer un composant enfant whenRunning
 
   // Création du controller s'il n'existe pas
   if (myPilot.current === null) {
-    myPilot.current = new ActuatorControllerTest();
+    myPilot.current = new ActuatorController();
   }
   const handleConfig = () => {
     Alert.alert(
