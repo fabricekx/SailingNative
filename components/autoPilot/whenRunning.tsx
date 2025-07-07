@@ -32,7 +32,7 @@ const WhenRuning: React.FC<WhenRunningProps> = ({
   const [capAsked, setCapAsked] = useState<number | null>(null);
   const [tolerance, setTolerance] = useState<number>(10);
 
- const capToUse =
+ const capToUse =  // si le  course existe (cap gps) je m'en sert
   course !== null && currentSpeed !== null && currentSpeed > 2
     ? course
     : heading;
@@ -78,8 +78,10 @@ const WhenRuning: React.FC<WhenRunningProps> = ({
           onPressIn={
             isPilotStarted
               ? () => {
-                  setCapAsked(capAsked - 5);
-                  capAsked < 0 && setCapAsked(capAsked + 360);
+                  setCapAsked((prev) => { //react va utiliser la valeur actuelle pour modifier le cap
+  const newCap = (prev - 5 + 360) % 360;
+  return newCap;
+});
                 }
               : () => myPilot.turnToDirection("babord", connectedDevice)
           }
@@ -137,8 +139,10 @@ const WhenRuning: React.FC<WhenRunningProps> = ({
           onPressIn={
             isPilotStarted
               ? () => {
-                  setCapAsked(capAsked + 5);
-                  capAsked > 360 && setCapAsked(capAsked - 360);
+                  setCapAsked((prev) => {
+  const newCap = (prev + 5 + 360) % 360;
+  return newCap;
+});
                 }
               : () => myPilot.turnToDirection("tribord", connectedDevice)
           }

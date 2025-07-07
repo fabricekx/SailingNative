@@ -327,7 +327,7 @@ export default class ActuatorController extends RelaisClass {
     */
       if (Math.abs(deviation) < tolerance && !this.isBarreCentered) {
         // si le cap est bon
-        this.handleCapOK(device);
+        await this.handleCapOK(device);
       }
     }
   }
