@@ -1,6 +1,5 @@
 import { View, Text , SafeAreaView} from 'react-native'
 import React, { useState } from 'react'
-import Compas from 'components/navigation/compas'
 import Course from 'components/navigation/course'
 import ClickButton from 'components/usefull/clickButton'
 import Compas1 from 'components/navigation/compas1'

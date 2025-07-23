@@ -2,118 +2,142 @@ import React, { useState, useEffect, useContext } from "react";
 import { Text, View, TouchableOpacity } from "react-native";
 import * as Location from "expo-location";
 import { CapContext } from "@/app/capContext";
-import { getDistance } from 'geolib';
+import { getDistance } from "geolib";
 
 interface CourseProps {
   unit: string;
 }
 
 const Course: React.FC<CourseProps> = ({ unit }) => {
-  const { course, setCourse,currentSpeed, setCurrentSpeed } = useContext(CapContext); // utilisation du context et pas du useState
-  const [maxSpeed, setMaxSpeed] = useState(0); // Vitesse maximale
-  const [distance, setDistance] = useState(0); // Distance parcourue en km
-  const [tracking, setTracking] = useState(false); // Indique si le tracking est actif
-  const [trackingDuration, setTrackingDuration] = useState(0); // Durée totale du tracking en secondes
-  const [speedValues, setSpeedValues] = useState<number[]>([]); // Historique des vitesses pour la moyenne
-  const [prevLocation, setPrevLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const { course, setCourse, currentSpeed, setCurrentSpeed } = useContext(CapContext);
+  const [maxSpeed, setMaxSpeed] = useState(0);
+  const [distance, setDistance] = useState(0);
+  const [tracking, setTracking] = useState(false);
+  const [trackingDuration, setTrackingDuration] = useState(0);
+  const [speedValues, setSpeedValues] = useState<number[]>([]);
+  const [trackingPoints, setTrackingPoints] = useState<{ latitude: number; longitude: number }[]>([]);
   const [accuracy, setAccuracy] = useState<number | null>(null);
 
-  // Fonction pour démarrer ou arrêter le tracking
+  // Gestion du tracking start/stop
   const toggleTracking = () => {
     setTracking((prev) => !prev);
     if (!tracking) {
-      setTrackingDuration(0); // Réinitialiser la durée si on redémarre le tracking
-      setSpeedValues([]); // Réinitialiser les vitesses pour la moyenne
+      setTrackingDuration(0);
+      setSpeedValues([]);
+      setDistance(0);
+      setTrackingPoints([]);
+      setMaxSpeed(0);
+      setCurrentSpeed(0);
+      setCourse(null);
     }
   };
 
-  // Fonction pour réinitialiser les données
+  // Reset complet
   const resetData = () => {
     setCurrentSpeed(0);
     setMaxSpeed(0);
     setDistance(0);
     setTrackingDuration(0);
-    setPrevLocation(null);
     setSpeedValues([]);
+    setTrackingPoints([]);
+    setCourse(null);
   };
 
- 
-
-  // Gestion de la localisation
+  // Mise à jour rapide cap et vitesse toutes les secondes (watchPositionAsync)
   useEffect(() => {
-    let locationSubscription: Location.LocationSubscription | null = null;
+    let subscription: Location.LocationSubscription | null = null;
+    let intervalId: NodeJS.Timeout | null = null;
+    let isMounted = true;
 
     const startTracking = async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.error("Permission denied for location access.");
+        console.warn("Permission GPS refusée");
         return;
       }
 
-      locationSubscription = await Location.watchPositionAsync(
+      // Mise à jour rapide cap + vitesse
+      subscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.BestForNavigation,
-          timeInterval: 1000, // Mise à jour toutes les secondes
-          distanceInterval: 1, // Mise à jour après 10 mètres
+          timeInterval: 1000, // 1 seconde
+          distanceInterval: 0,
         },
         (location) => {
-          const { speed, heading, latitude, longitude, accuracy } =
-            location.coords;
+          if (!isMounted) return;
+          const { speed, heading, accuracy } = location.coords;
 
-          if (accuracy > 10 || !accuracy) return; // si la précision du GPS est mauvaise, on sort
-          // Mise à jour de la précision
-          setAccuracy(accuracy);
-          // Toujours mettre à jour la vitesse actuelle et le cap
-          setCurrentSpeed(speed !== null ? speed * 3.6 : 0); // Conversion en km/h
-          setCourse(heading !== null ? heading : null);
+          if (accuracy && accuracy <= 10) {
+            setAccuracy(accuracy);
+            setCurrentSpeed(speed !== null ? speed * 3.6 : 0); // km/h
+            setCourse(heading !== null ? heading : null);
 
-          // Si on est en mode tracking, on enregistre le reste (distance, vitesse Max)
-          if (tracking) {
-            // Calcul de la distance parcourue
-            if (prevLocation) {
-              const distanceIncrement = getDistance(
-                { latitude: prevLocation.latitude, longitude: prevLocation.longitude },
-                { latitude, longitude }
-              ) / 1000; // Conversion en kilomètres
-            
-              if (distanceIncrement > 0.01) {
-                setDistance((prevDistance) => prevDistance + distanceIncrement);
-              }
-            }
-            setPrevLocation({ latitude, longitude });
-
-            // Mise à jour de la vitesse maximale
             if (speed !== null && speed * 3.6 > maxSpeed) {
               setMaxSpeed(speed * 3.6);
             }
 
-            // Mise à jour des vitesses pour la moyenne
             if (speed !== null && speed * 3.6 > 1) {
               setSpeedValues((prev) => {
-                const updatedSpeeds = [...prev, speed * 3.6];
-                if (updatedSpeeds.length > 10) updatedSpeeds.shift(); // Garder les 10 dernières valeurs
-                return updatedSpeeds;
+                const updated = [...prev, speed * 3.6];
+                if (updated.length > 10) updated.shift();
+                return updated;
               });
             }
           }
         }
       );
+
+      // Mise à jour lente position pour calcul distance toutes les 60 secondes
+      intervalId = setInterval(async () => {
+        if (!isMounted) return;
+
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+        const { latitude, longitude, accuracy } = location.coords;
+
+        if (accuracy && accuracy <= 10) {
+          setAccuracy(accuracy);
+
+          const newPoint = { latitude, longitude };
+          setTrackingPoints((prevPoints) => {
+            if (prevPoints.length === 0) {
+              return [newPoint]; // premier point
+            } else {
+              const lastPoint = prevPoints[prevPoints.length - 1];
+              const dist = getDistance(lastPoint, newPoint) / 1000; // km
+              if (dist > 0.01) {
+                setDistance((prev) => prev + dist);
+                return [...prevPoints, newPoint];
+              }
+              return prevPoints;
+            }
+          });
+        }
+      }, 60000); // toutes les 60s
     };
 
-    startTracking();
+    if (tracking) {
+      startTracking();
+    } else {
+      // Stop tracking : cleanup
+      if (subscription) subscription.remove();
+      if (intervalId) clearInterval(intervalId);
+      setAccuracy(null);
+      setCurrentSpeed(0);
+      setCourse(null);
+    }
 
     return () => {
-      if (locationSubscription) locationSubscription.remove();
+      isMounted = false;
+      if (subscription) subscription.remove();
+      if (intervalId) clearInterval(intervalId);
     };
-  }, [tracking, prevLocation]);
+  }, [tracking]);
 
-  // Timer pour la durée de tracking
+  // Timer durée tracking
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
-
     if (tracking) {
       timer = setInterval(() => {
         setTrackingDuration((prev) => prev + 1);
@@ -121,28 +145,29 @@ const Course: React.FC<CourseProps> = ({ unit }) => {
     } else if (!tracking && timer) {
       clearInterval(timer);
     }
-
     return () => {
       if (timer) clearInterval(timer);
     };
   }, [tracking]);
 
-  // Formatage de la durée
+  const birdDistance =
+    trackingPoints.length >= 2
+      ? getDistance(trackingPoints[0], trackingPoints[trackingPoints.length - 1]) / 1000
+      : 0;
+
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     const remainingSeconds = seconds % 60;
-
     return `${hours}h ${remainingMinutes}m ${remainingSeconds}s`;
   };
+
   return (
     <View className="flex-row flex-wrap justify-between">
       {/* Vitesse actuelle */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-800 dark:text-blue-400">
-          Vitesse (SOG) :
-        </Text>
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Vitesse (SOG) :</Text>
         <Text className="text-5xl text-black dark:text-slate-400">
           {currentSpeed > 0
             ? unit === "Noeuds"
@@ -152,23 +177,17 @@ const Course: React.FC<CourseProps> = ({ unit }) => {
         </Text>
       </View>
 
-      {/* Cap actuel */}
+      {/* Cap */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-800 dark:text-blue-400">
-          Cap suivi (COG) :
-        </Text>
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Cap suivi (COG) :</Text>
         <Text className="text-5xl text-black dark:text-slate-400">
-          {currentSpeed >= 2 && course !== null // on n'affiche pas de cap si la vitesse est inférieure à 2 km/h
-            ? `${course.toFixed(0)}°`
-            : "..."}
+          {currentSpeed >= 2 && course !== null ? `${course.toFixed(0)}°` : "..."}
         </Text>
       </View>
 
       {/* Vitesse max */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-800 dark:text-blue-400">
-          Vitesse Max :
-        </Text>
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Vitesse Max :</Text>
         <Text className="text-5xl text-black dark:text-slate-400">
           {tracking
             ? unit === "Noeuds"
@@ -180,21 +199,17 @@ const Course: React.FC<CourseProps> = ({ unit }) => {
 
       {/* Vitesse moyenne */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-800 dark:text-blue-400">
-          Vitesse Moy. :
-        </Text>
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Vitesse Moy. :</Text>
         <Text className="text-5xl text-black dark:text-slate-400">
           {tracking
             ? unit === "Noeuds"
-              ? `${(((distance * 3600) / trackingDuration) * 1.852).toFixed(
-                  1
-                )} `
+              ? `${(((distance * 3600) / trackingDuration) / 1.852).toFixed(1)} `
               : `${((distance * 3600) / trackingDuration).toFixed(1)} `
             : "..."}
         </Text>
       </View>
 
-      {/* Distance parcourue */}
+      {/* Distance réelle */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
         <Text className="text-xl text-blue-800 dark:text-blue-400">Lock :</Text>
         <Text className="text-5xl text-black dark:text-slate-400">
@@ -206,11 +221,21 @@ const Course: React.FC<CourseProps> = ({ unit }) => {
         </Text>
       </View>
 
+      {/* Distance à vol d'oiseau */}
+      <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
+        <Text className="text-xl text-blue-800 dark:text-blue-400">À vol d’oiseau :</Text>
+        <Text className="text-3xl text-black dark:text-slate-400">
+          {tracking
+            ? unit === "Noeuds"
+              ? `${(birdDistance / 1.852).toFixed(2)} M`
+              : `${birdDistance.toFixed(1)} Km`
+            : "..."}
+        </Text>
+      </View>
+
       {/* Durée */}
       <View className="w-[45%] items-center bg-white dark:bg-slate-600 rounded-lg p-2 m-2">
-        <Text className="text-xl text-blue-800 dark:text-blue-400">
-          Durée :
-        </Text>
+        <Text className="text-xl text-blue-800 dark:text-blue-400">Durée :</Text>
         <Text className="text-3xl text-black dark:text-slate-400">
           {formatDuration(trackingDuration)}
         </Text>
@@ -219,12 +244,10 @@ const Course: React.FC<CourseProps> = ({ unit }) => {
       {/* Boutons */}
       <View className="flex-row justify-between w-full">
         <TouchableOpacity
-          onPress={() => setTracking((prev) => !prev)}
+          onPress={toggleTracking}
           className="px-4 py-2 bg-green-500 rounded-lg mr-2"
         >
-          <Text className="text-white text-lg">
-            {tracking ? "Stop" : "Start"}
-          </Text>
+          <Text className="text-white text-lg">{tracking ? "Stop" : "Start"}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
@@ -236,9 +259,8 @@ const Course: React.FC<CourseProps> = ({ unit }) => {
           <Text className="text-white text-lg">Reset</Text>
         </TouchableOpacity>
       </View>
-      <Text className="text-white">
-        Précision :{accuracy && accuracy.toFixed(1)}
-      </Text>
+
+      <Text className="text-white">Précision : {accuracy !== null ? accuracy.toFixed(1) : "N/A"}</Text>
     </View>
   );
 };

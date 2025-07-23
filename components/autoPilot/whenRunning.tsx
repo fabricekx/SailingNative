@@ -8,6 +8,7 @@ import { Device } from "react-native-ble-plx";
 import ActuatorController from "ts/pilotActuatorExtendRelaisClass";
 import { CapContext } from "@/app/capContext";
 
+
 interface WhenRunningProps {
   myPilot: ActuatorController;
   connectedDevice: Device | null;

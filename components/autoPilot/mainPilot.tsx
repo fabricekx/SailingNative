@@ -15,12 +15,16 @@ import ActuatorController from "ts/pilotActuatorExtendRelaisClass";
 import ConfigTiller from "./configTiller";
 import WhenRuning from "./whenRunning";
 import { CapContext } from "@/app/capContext";
+import { useKeepAwake } from 'expo-keep-awake';
+
 
 interface MainPilotProps {
   connectedDevice: Device | null;
 }
 
 const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
+    useKeepAwake(); // Empêche le téléphone de se mettre en veille tant que ce composant est monté
+
   const [isConfigVisible, setIsConfigVisible] = useState(false); // État pour afficher/masquer la vue contextuelle
   const [modalVisible, setModalVisible] = useState(false); // pour afficher la config
   const { course, setCourse } = useContext(CapContext); // utilisation du context et pas du useState
@@ -32,6 +36,8 @@ const MainPilot: React.FC<MainPilotProps> = ({ connectedDevice }) => {
   if (myPilot.current === null) {
     myPilot.current = new ActuatorController();
   }
+
+  
   const handleConfig = () => {
     Alert.alert(
       "Confirmation",
